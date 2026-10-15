@@ -14,13 +14,16 @@ Candidates are everyone listed as having expressed interest or as a potential ca
 - Edit tiers: rename, recolor, add, delete, reorder.
 - Rankings save in the browser automatically.
 - Copy share link encodes the whole tier list in the URL.
-- Save as image exports a PNG.
+- Save as image exports a PNG (of whichever view is on).
+- Expanded view lists each tier's candidates as rows with 1–10 ratings for Juice, Fundraising,
+  Policy, Favorability and Debate skills, plus a total out of 50. Click any score to change it.
+  Edits save in the browser and travel with share links. Reset ratings restores the defaults.
 
 ## Files
 
 - `index.html`, `style.css`, `app.js`: the app. Static, no build step.
-- `candidates.js`: the candidate list. Edit this to add or remove people.
-- `images/<id>.jpg`: portraits. If a file is missing, the app loads the lead photo from the person's Wikipedia article.
+- `candidates.js`: the candidate list and default ratings. Edit this to add or remove people or change the starting scores.
+- `images/<id>.jpg`: portraits from the Wikipedia article (see `images/CREDITS.md`). If a file is missing, the app loads the lead photo from the person's Wikipedia article.
 
 ## Run locally
 

@@ -32,18 +32,27 @@
       Add tier
     </button>
     <button class="btn" id="btn-reset" type="button">Reset</button>
+    <button class="btn" id="btn-reset-ratings" type="button" hidden>Reset ratings</button>
     <span class="spacer"></span>
     <label class="toggle" for="opt-names"><input type="checkbox" id="opt-names" checked> Show names</label>
+    <label class="switch" for="opt-expanded"><input type="checkbox" id="opt-expanded" role="switch"><span class="track" aria-hidden="true"></span> Expanded view</label>
   </div>
 
-  <section class="board" id="board" aria-label="Tiers"></section>
+  <div class="scroll-x">
+    <section class="board" id="board" aria-label="Tiers"></section>
+  </div>
 
   <section aria-labelledby="pool-title" style="display:grid;gap:10px">
     <div class="pool-head">
       <h2 id="pool-title">Unranked</h2>
-      <p class="hint">Tap a photo, then a tier. Keys: Enter selects, 1–9 sends to a tier, 0 returns here.</p>
+      <p class="hint" id="pool-hint">Tap a photo, then a tier. Keys: Enter selects, 1–9 sends to a tier, 0 returns here.</p>
     </div>
-    <div class="zone pool" id="pool" data-zone="pool" aria-label="Unranked candidates"></div>
+    <div class="scroll-x">
+      <div class="pool-table">
+        <div class="pool-cols" id="pool-cols" aria-hidden="true" hidden></div>
+        <div class="zone pool" id="pool" data-zone="pool" aria-label="Unranked candidates"></div>
+      </div>
+    </div>
   </section>
 
   <p class="sources">Candidates: everyone listed as having expressed interest or as a potential candidate on Wikipedia's <a href="https://en.wikipedia.org/wiki/2028_Democratic_Party_presidential_primaries" target="_blank" rel="noopener">2028 Democratic Party presidential primaries</a> page. No one has formally declared. Photos via Wikimedia Commons.</p>
