@@ -353,6 +353,90 @@ body.expanded .tier { min-height: calc(var(--row-h) + 2px); }
 .pool-table { display: grid; }
 .pool-cols { background: var(--surface); border: 1px solid var(--line); border-bottom: 0; border-radius: 4px 4px 0 0; }
 
+/* Candidate profile: large card over the page */
+.dialog.profile {
+  position: relative;
+  width: min(1080px, 100%);
+  height: min(760px, 100%);
+  padding: 0;
+  gap: 0;
+  grid-template-columns: minmax(220px, 38%) minmax(0, 1fr);
+  overflow: hidden;
+  border-top: 6px solid var(--tier-color);
+}
+.profile-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+}
+.profile-close svg { width: 22px; height: 22px; }
+.profile-photo { position: relative; background: var(--ctl); min-height: 0; }
+.profile-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 18%; display: block; }
+.profile-photo .initials { position: absolute; inset: 0; display: grid; place-items: center; font: 700 72px/1 var(--font-display); color: var(--muted); }
+.profile-body { overflow: auto; padding: 28px 32px; display: grid; align-content: start; gap: 14px; }
+.profile-tier {
+  justify-self: start;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  background: var(--tier-color);
+  color: var(--tier-ink);
+  font: 700 18px/1 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding: 7px 12px;
+}
+.profile-tier span { font: 600 12px/1 var(--font-body); text-transform: none; letter-spacing: 0; opacity: .8; }
+.dialog .profile-name { margin: 0; font: 700 clamp(34px, 5vw, 56px)/.95 var(--font-display); text-transform: uppercase; text-wrap: balance; padding-right: 40px; }
+.profile-role { margin: 0; color: var(--muted); font-size: 15px; }
+.profile-note { margin: 0; font-size: 14px; font-weight: 600; }
+.profile-total {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-block: 1px solid var(--line);
+  padding-block: 10px;
+}
+.profile-total .big { font: 700 72px/.9 var(--font-display); font-variant-numeric: tabular-nums; }
+.profile-total .of { font: 700 28px/1 var(--font-display); color: var(--muted); margin-left: 4px; }
+.profile-total .rank { color: var(--muted); font-size: 14px; padding-bottom: 6px; }
+.profile-total .rank strong { color: var(--fg); font: 700 24px/1 var(--font-display); margin-right: 4px; }
+.profile-scores { display: grid; gap: 14px; }
+.pscore {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) 44px;
+  grid-template-areas: "label bar val" ". cmp cmp";
+  align-items: center;
+  column-gap: 14px;
+  row-gap: 4px;
+}
+.plabel { grid-area: label; font: 700 15px/1.1 var(--font-display); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.pbar { grid-area: bar; position: relative; display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; height: 26px; }
+.seg { background: var(--ctl); border-radius: 2px; }
+.seg.on { background: hsl(var(--score-hue) 62% 46%); }
+.pavg { position: absolute; top: -4px; bottom: -4px; width: 3px; margin-left: -1.5px; background: var(--fg); border-radius: 2px; }
+.pval { grid-area: val; font: 700 34px/1 var(--font-display); text-align: right; font-variant-numeric: tabular-nums; }
+.pcmp { grid-area: cmp; font-size: 12.5px; color: var(--muted); }
+.profile-foot { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+.profile-foot a { color: inherit; }
+
+@media (max-width: 720px) {
+  .dialog.profile { grid-template-columns: 1fr; grid-template-rows: 34% minmax(0, 1fr); height: 100%; }
+  .profile-body { padding: 18px 18px 22px; gap: 12px; }
+  .profile-total .big { font-size: 56px; }
+  .pscore { grid-template-columns: 92px minmax(0, 1fr) 34px; column-gap: 10px; }
+  .pval { font-size: 28px; }
+  .pbar { height: 22px; gap: 2px; }
+}
+
 /* Pool */
 .pool-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 h2 {

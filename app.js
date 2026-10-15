@@ -2,7 +2,9 @@
   'use strict';
 
   var CANDIDATES = window.CANDIDATES || [];
-  var FIELDS = window.RATING_FIELDS || [];
+  var FIELD_KEYS = Object.keys(window.SCORE_FIELDS || {});
+  var FIELDS = FIELD_KEYS.map(function (k) { return window.SCORE_FIELDS[k]; });
+  var SCORES = window.CANDIDATE_SCORES || {};
   var BY_ID = {};
   CANDIDATES.forEach(function (c) { BY_ID[c.id] = c; });
 
@@ -36,7 +38,10 @@
 
   function defaultRatings() {
     var r = {};
-    CANDIDATES.forEach(function (c) { r[c.id] = FIELDS.map(function (f, i) { return clampScore((c.ratings || [])[i]); }); });
+    CANDIDATES.forEach(function (c) {
+      var sc = SCORES[c.id] || {};
+      r[c.id] = FIELD_KEYS.map(function (k) { return clampScore(sc[k]); });
+    });
     return r;
   }
   function clampScore(v) {
@@ -295,7 +300,9 @@
   // Expanded view shows each tier highest total first; ties keep the order they were dragged in.
   // This is display order only, so normal view keeps the hand-arranged order.
   function displayItems(t) {
-    if (!state.expanded) return t.items;
+    return state.expanded ? sortedItems(t) : t.items;
+  }
+  function sortedItems(t) {
     return t.items
       .map(function (id, i) { return { id: id, i: i, total: total(id) }; })
       .sort(function (a, b) { return b.total - a.total || a.i - b.i; })
@@ -448,6 +455,7 @@
     var list = listFor(zoneId);
     if (!list) return;
     removeEverywhere(id);
+    lastTap = { id: null, t: 0 }; // a move ends any double-click in progress
     if (index == null || index > list.length) index = list.length;
     list.splice(index, 0, id);
     save();
@@ -471,7 +479,7 @@
     if (suppressClick) { suppressClick = false; return; }
     if (e.target.closest('.score')) return;
     var card = e.target.closest('.entry');
-    if (card) { select(card.dataset.id); return; }
+    if (card) { tapEntry(card.dataset.id); return; }
     var zone = e.target.closest('[data-zone]');
     if (!zone && e.target.closest('.tier-label')) zone = e.target.closest('.tier').querySelector('[data-zone]');
     if (zone && selectedId) {
@@ -489,7 +497,7 @@
     var card = e.target.closest && e.target.closest('.entry');
     if (card && (e.key === 'Enter' || e.key === ' ')) {
       e.preventDefault();
-      select(card.dataset.id);
+      tapEntry(card.dataset.id);
       return;
     }
     if (e.key === 'Escape' && selectedId) { selectedId = null; updateSelectionUI(); return; }
@@ -503,6 +511,94 @@
     moveCard(target, zoneId);
     entryEl(target).focus({ preventScroll: true });
   });
+
+  // Two clicks (or taps, or Enter presses) on the same ranked candidate within this window open the profile.
+  var DOUBLE_MS = 400;
+  var lastTap = { id: null, t: 0 };
+  function tapEntry(id) {
+    var now = Date.now();
+    var isDouble = lastTap.id === id && now - lastTap.t < DOUBLE_MS;
+    lastTap = isDouble ? { id: null, t: 0 } : { id: id, t: now };
+    if (isDouble && tierOf(id)) {
+      selectedId = null;
+      updateSelectionUI();
+      openProfile(id);
+      return;
+    }
+    select(id);
+  }
+  function tierOf(id) {
+    for (var i = 0; i < state.tiers.length; i++) if (state.tiers[i].items.indexOf(id) >= 0) return state.tiers[i];
+    return null;
+  }
+
+  // ---------- candidate profile ----------
+  function fieldAverage(i) {
+    var sum = 0;
+    CANDIDATES.forEach(function (c) { sum += state.ratings[c.id][i]; });
+    return sum / CANDIDATES.length;
+  }
+  function overallRank(id) {
+    var mine = total(id);
+    var better = CANDIDATES.filter(function (c) { return total(c.id) > mine; }).length;
+    var tied = CANDIDATES.filter(function (c) { return total(c.id) === mine; }).length;
+    return { rank: better + 1, tied: tied > 1, of: CANDIDATES.length };
+  }
+  function ordinal(n) {
+    var s = ['th', 'st', 'nd', 'rd'], v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  }
+
+  function openProfile(id) {
+    var c = BY_ID[id];
+    var tier = tierOf(id);
+    var vals = state.ratings[id];
+    var tot = total(id);
+    var max = FIELDS.length * 10;
+    var r = overallRank(id);
+    var tierPos = sortedItems(tier).indexOf(id) + 1; // position by score, as in expanded view
+
+    openDialog(function (dlg, close) {
+      dlg.setAttribute('aria-label', c.name + ' profile');
+      dlg.style.setProperty('--tier-color', tier.color);
+      dlg.innerHTML =
+        '<button class="icon-btn profile-close" type="button" aria-label="Close profile">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>' +
+        '<div class="profile-photo" data-id="' + escapeAttr(id) + '"></div>' +
+        '<div class="profile-body">' +
+          '<div class="profile-tier">' + escapeAttr(tier.label || 'Unnamed tier') + '<span>' + ordinal(tierPos) + ' of ' + tier.items.length + ' in tier</span></div>' +
+          '<h3 class="profile-name">' + escapeAttr(c.name) + '</h3>' +
+          '<p class="profile-role">' + escapeAttr(c.role) + (c.years ? ' · ' + escapeAttr(c.years) : '') + '</p>' +
+          (c.note ? '<p class="profile-note">' + escapeAttr(c.note) + '</p>' : '') +
+          '<div class="profile-total">' +
+            '<div><span class="big">' + tot + '</span><span class="of">/' + max + '</span></div>' +
+            '<div class="rank"><strong>' + (r.tied ? 'T-' : '') + ordinal(r.rank) + '</strong> of ' + r.of + ' in the field</div>' +
+          '</div>' +
+          '<div class="profile-scores">' +
+            FIELDS.map(function (f, i) {
+              var v = vals[i];
+              var avg = fieldAverage(i);
+              var cells = '';
+              for (var k = 1; k <= 10; k++) cells += '<span class="seg' + (k <= v ? ' on' : '') + '"></span>';
+              var diff = v - avg;
+              var cmp = Math.abs(diff) < 0.5 ? 'about average' : (diff > 0 ? '+' : '−') + Math.abs(diff).toFixed(1) + ' vs. field';
+              return '<div class="pscore" style="--score-hue:' + Math.round((v - 1) / 9 * 125) + '">' +
+                '<span class="plabel">' + escapeAttr(f) + '</span>' +
+                '<span class="pbar" role="img" aria-label="' + v + ' out of 10">' + cells +
+                  '<span class="pavg" style="left:' + (avg / 10 * 100) + '%" title="Field average ' + avg.toFixed(1) + '"></span></span>' +
+                '<span class="pval">' + v + '</span>' +
+                '<span class="pcmp">Field avg ' + avg.toFixed(1) + ' · ' + cmp + '</span>' +
+              '</div>';
+            }).join('') +
+          '</div>' +
+          '<p class="profile-foot">The tick on each bar marks the field average across all ' + CANDIDATES.length + ' candidates. ' +
+          '<a href="https://en.wikipedia.org/wiki/' + encodeURIComponent(c.wiki) + '" target="_blank" rel="noopener">' + escapeAttr(c.name) + ' on Wikipedia</a></p>' +
+        '</div>';
+      var img = photo(c);
+      dlg.querySelector('.profile-photo').appendChild(img);
+      dlg.querySelector('.profile-close').addEventListener('click', close);
+    }, 'profile');
+  }
 
   // ---------- drag and drop (mouse, pen and touch) ----------
   var drag = null;          // active or pending drag
@@ -708,7 +804,7 @@
     var scrim = document.createElement('div');
     scrim.className = 'scrim';
     var dlg = document.createElement('div');
-    dlg.className = 'dialog' + (wide ? ' wide' : '');
+    dlg.className = 'dialog' + (wide === true ? ' wide' : wide ? ' ' + wide : '');
     dlg.setAttribute('role', 'dialog');
     dlg.setAttribute('aria-modal', 'true');
     scrim.appendChild(dlg);
