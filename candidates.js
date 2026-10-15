@@ -3,6 +3,7 @@
 window.CANDIDATE_GROUPS = {
   interest: 'Expressed interest',
   potential: 'Potential',
+  added: 'Added by request (not listed in the article)',
 };
 
 // Default 1–10 ratings for expanded view, in RATING_FIELDS order. Viewers can edit their own copy.
@@ -26,4 +27,8 @@ window.CANDIDATES = [
   { id: 'pritzker', name: 'JB Pritzker', role: 'Governor of Illinois', years: '2019–present', group: 'potential', wiki: 'JB_Pritzker', ratings: [6, 10, 7, 6, 6] },
   { id: 'shapiro', name: 'Josh Shapiro', role: 'Governor of Pennsylvania', years: '2023–present', group: 'potential', wiki: 'Josh_Shapiro', ratings: [7, 8, 6, 7, 7] },
   { id: 'warnock', name: 'Raphael Warnock', role: 'Senator from Georgia', years: '2021–present', group: 'potential', wiki: 'Raphael_Warnock', ratings: [4, 7, 6, 6, 7] },
+  { id: 'ossoff', name: 'Jon Ossoff', role: 'Senator from Georgia', years: '2021–present', group: 'added', wiki: 'Jon_Ossoff', ratings: [6, 9, 6, 6, 7] },
+  { id: 'moore', name: 'Wes Moore', role: 'Governor of Maryland', years: '2023–present', group: 'added', wiki: 'Wes_Moore', ratings: [7, 8, 6, 7, 7] },
+  { id: 'smith', name: 'Stephen A. Smith', role: 'ESPN commentator, New York', years: '', group: 'added', wiki: 'Stephen_A._Smith', ratings: [6, 5, 2, 4, 8] },
+  { id: 'booker', name: 'Cory Booker', role: 'Senator from New Jersey', years: '2013–present', group: 'added', wiki: 'Cory_Booker', ratings: [6, 8, 6, 5, 7] },
 ];

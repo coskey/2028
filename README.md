@@ -5,7 +5,9 @@ Drag-and-drop tier maker for the 2028 Democratic presidential field, in the styl
 Tiers: Frontrunner, Contender, Dark Horse, VP Audition, <5%, Joever.
 
 Candidates are everyone listed as having expressed interest or as a potential candidate on Wikipedia's
-[2028 Democratic Party presidential primaries](https://en.wikipedia.org/wiki/2028_Democratic_Party_presidential_primaries) page.
+[2028 Democratic Party presidential primaries](https://en.wikipedia.org/wiki/2028_Democratic_Party_presidential_primaries) page,
+plus Jon Ossoff, Wes Moore, Stephen A. Smith and Cory Booker (added by request; their photos are the lead images
+from their own Wikipedia articles).
 
 ## Features
 

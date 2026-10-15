@@ -21,3 +21,10 @@ cropped to 3:4 and resized to 300×400. Each is hosted on Wikimedia Commons unde
 - `pritzker.jpg`: [File:JB_Pritzker_2026_(cropped).jpg](https://commons.wikimedia.org/wiki/File:JB_Pritzker_2026_%28cropped%29.jpg)
 - `shapiro.jpg`: [File:Josh_Shapiro_December_2025_B.jpg](https://commons.wikimedia.org/wiki/File:Josh_Shapiro_December_2025_B.jpg)
 - `warnock.jpg`: [File:2025_Congressional_Black_Caucus_Foundation_Phoenix_Awards_(54820357189)_(cropped).jpg](https://commons.wikimedia.org/wiki/File:2025_Congressional_Black_Caucus_Foundation_Phoenix_Awards_%2854820357189%29_%28cropped%29.jpg)
+
+These four are the lead photos from each person's own Wikipedia article:
+
+- `ossoff.jpg`: [File:Jon_Ossoff_Senate_Portrait_2021.jpg](https://commons.wikimedia.org/wiki/File:Jon_Ossoff_Senate_Portrait_2021.jpg)
+- `moore.jpg`: [File:Wes_Moore_Official_Governor_Portrait.jpg](https://commons.wikimedia.org/wiki/File:Wes_Moore_Official_Governor_Portrait.jpg)
+- `smith.jpg`: [File:Stephen_A._Smith_in_January_2023_(3x4_cropped_c).jpg](https://commons.wikimedia.org/wiki/File:Stephen_A._Smith_in_January_2023_%283x4_cropped_c%29.jpg)
+- `booker.jpg`: [File:Cory_Booker,_official_portrait_(119th_Congress).jpg](https://commons.wikimedia.org/wiki/File:Cory_Booker%2C_official_portrait_%28119th_Congress%29.jpg)
