@@ -20,6 +20,8 @@ from their own Wikipedia articles).
 - Expanded view lists each tier's candidates as rows with 1–10 ratings for Juice, Fundraising,
   Policy, Favorability and Debate skills, plus a total out of 50. Click any score to change it.
   Edits save in the browser and travel with share links. Reset ratings restores the defaults.
+  In expanded view each tier sorts by total (ties keep their dragged order), and Unranked candidates
+  show as photos only. Normal view keeps the hand-arranged order.
 
 ## Files
 

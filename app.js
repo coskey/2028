@@ -290,7 +290,25 @@
     tot.textContent = t;
     tot.style.setProperty('--score-hue', String(Math.round(Math.max(0, t - 10) / 40 * 125)));
   }
-  function entryEl(id) { return state.expanded ? rowEls[id] : cardEls[id]; }
+  function entryEl(id) { return state.expanded && state.pool.indexOf(id) < 0 ? rowEls[id] : cardEls[id]; }
+
+  // Expanded view shows each tier highest total first; ties keep the order they were dragged in.
+  // This is display order only, so normal view keeps the hand-arranged order.
+  function displayItems(t) {
+    if (!state.expanded) return t.items;
+    return t.items
+      .map(function (id, i) { return { id: id, i: i, total: total(id) }; })
+      .sort(function (a, b) { return b.total - a.total || a.i - b.i; })
+      .map(function (x) { return x.id; });
+  }
+  function displayedOrder() {
+    return Array.prototype.map.call(board.querySelectorAll('.zone'), function (z) {
+      return Array.prototype.map.call(z.children, function (n) { return n.dataset.id; }).join();
+    }).join('|');
+  }
+  function expectedOrder() {
+    return state.tiers.map(function (t) { return displayItems(t).join(); }).join('|');
+  }
 
   CANDIDATES.forEach(function (c) { cardEls[c.id] = buildCard(c); rowEls[c.id] = buildRow(c); });
 
@@ -308,7 +326,20 @@
     var input = e.target;
     if (!input.matches || !input.matches('.row-entry input[data-field]')) return;
     paintRow(input.closest('.row-entry').dataset.id);
+    setTimeout(resortIfNeeded, 0);
   });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && e.target.matches && e.target.matches('.row-entry input[data-field]')) {
+      e.preventDefault();
+      resortIfNeeded();
+    }
+  });
+  function resortIfNeeded() {
+    if (!state.expanded || expectedOrder() === displayedOrder()) return;
+    var active = document.activeElement;
+    render();
+    if (active && active !== document.body && document.contains(active)) active.focus({ preventScroll: true });
+  }
   document.addEventListener('focusin', function (e) {
     if (e.target.matches && e.target.matches('.row-entry input[data-field]')) e.target.select();
   });
@@ -333,14 +364,13 @@
     namesToggle.checked = state.showNames;
     expandToggle.checked = state.expanded;
     resetRatingsBtn.hidden = !state.expanded;
-    namesToggle.parentNode.hidden = state.expanded;
 
     // Detach entries first so rebuilding rows never destroys them.
     [cardEls, rowEls].forEach(function (set) {
       Object.keys(set).forEach(function (id) { var el = set[id]; if (el.parentNode) el.parentNode.removeChild(el); });
     });
     board.textContent = '';
-    poolEl.classList.toggle('list', state.expanded);
+    poolEl.classList.remove('list');
 
     if (state.expanded) {
       var head = document.createElement('div');
@@ -351,13 +381,10 @@
         '<span class="h-score h-total">Total<small>/' + FIELDS.length * 10 + '</small></span></div><span></span>';
       board.appendChild(head);
       Object.keys(rowEls).forEach(paintRow);
-      poolHead.innerHTML = '<span class="h-who">Candidate</span>' +
-        FIELDS.map(function (f) { return '<span class="h-score">' + escapeAttr(f) + '</span>'; }).join('') +
-        '<span class="h-score h-total">Total</span>';
     }
-    poolHead.hidden = !state.expanded;
+    poolHead.hidden = true;
     document.getElementById('pool-hint').textContent = state.expanded
-      ? 'Drag a row into a tier. Click any score to change it (1–10).'
+      ? 'Drag a photo into a tier to rate it. Click any score to change it (1–10). Each tier sorts by total.'
       : 'Tap a photo, then a tier. Keys: Enter selects, 1–9 sends to a tier, 0 returns here.';
 
     state.tiers.forEach(function (t, i) {
@@ -374,7 +401,7 @@
       zone.className = 'zone' + (state.expanded ? ' list' : '');
       zone.dataset.zone = t.id;
       zone.setAttribute('aria-label', (t.label || 'Unnamed') + ' tier');
-      t.items.forEach(function (id) { zone.appendChild(entryEl(id)); });
+      displayItems(t).forEach(function (id) { zone.appendChild(entryEl(id)); });
       row.appendChild(zone);
 
       var ctl = document.createElement('div');
@@ -600,14 +627,15 @@
     var cards = Array.prototype.filter.call(zone.children, function (n) {
       return n.classList.contains('entry') && n !== drag.el;
     });
-    var vertical = zone.classList.contains('list');
+    if (zone.classList.contains('list')) {
+      if (placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
+      drag.beforeId = null;
+      autoScroll();
+      return;
+    }
     var before = null;
     for (var i = 0; i < cards.length; i++) {
       var r = cards[i].getBoundingClientRect();
-      if (vertical) {
-        if (drag.y < r.top + r.height / 2) { before = cards[i]; break; }
-        continue;
-      }
       if (drag.y < r.top) { before = cards[i]; break; }
       if (drag.y <= r.bottom && drag.x < r.left + r.width / 2) { before = cards[i]; break; }
     }
@@ -922,6 +950,7 @@
     var W = 1240, PAD = 24, HEAD = 92, COLS = 46, LABEL = 170, WHO = 360, ROW = 64;
     var SC = Math.floor((W - PAD * 2 - LABEL - WHO) / (FIELDS.length + 1));
     var heights = state.tiers.map(function (t) { return Math.max(1, t.items.length) * ROW; });
+    var orders = state.tiers.map(displayItems);
     var H = HEAD + COLS + heights.reduce(function (a, b) { return a + b + 1; }, 0) + PAD + 30;
     var ids = [];
     state.tiers.forEach(function (t) { ids = ids.concat(t.items); });
@@ -979,7 +1008,7 @@
         ctx.textBaseline = 'middle';
         fitText(ctx, t.label.toUpperCase(), PAD + LABEL / 2, y + h / 2, LABEL - 20, 30, display);
 
-        t.items.forEach(function (id, k) {
+        orders[ti].forEach(function (id, k) {
           var ry = y + k * ROW;
           if (k) { ctx.fillStyle = '#2c3039'; ctx.fillRect(PAD + LABEL, ry, W - PAD * 2 - LABEL, 1); }
           var px = PAD + LABEL + 10, pw = 42, ph = 56;
