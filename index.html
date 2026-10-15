@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>2028 Democratic Tier List</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Public+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="wrap">
+  <header class="masthead">
+    <span class="eyebrow">Democratic presidential primaries · 2028</span>
+    <h1>Rank the 2028 field</h1>
+    <p class="lede">Drag each candidate into a tier. On a phone, press and hold a photo to pick it up, or tap a photo and then tap a tier.</p>
+  </header>
+
+  <div class="toolbar" role="toolbar" aria-label="Tier list actions">
+    <button class="btn primary" id="btn-share" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+      Copy share link
+    </button>
+    <button class="btn" id="btn-image" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+      Save as image
+    </button>
+    <button class="btn" id="btn-add-tier" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      Add tier
+    </button>
+    <button class="btn" id="btn-reset" type="button">Reset</button>
+    <span class="spacer"></span>
+    <label class="toggle" for="opt-names"><input type="checkbox" id="opt-names" checked> Show names</label>
+  </div>
+
+  <section class="board" id="board" aria-label="Tiers"></section>
+
+  <section aria-labelledby="pool-title" style="display:grid;gap:10px">
+    <div class="pool-head">
+      <h2 id="pool-title">Unranked</h2>
+      <p class="hint">Tap a photo, then a tier. Keys: Enter selects, 1–9 sends to a tier, 0 returns here.</p>
+    </div>
+    <div class="zone pool" id="pool" data-zone="pool" aria-label="Unranked candidates"></div>
+  </section>
+
+  <p class="sources">Candidates: everyone listed as having expressed interest or as a potential candidate on Wikipedia's <a href="https://en.wikipedia.org/wiki/2028_Democratic_Party_presidential_primaries" target="_blank" rel="noopener">2028 Democratic Party presidential primaries</a> page. No one has formally declared. Photos via Wikimedia Commons.</p>
+</main>
+
+<script src="candidates.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
