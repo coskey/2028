@@ -1,0 +1,1680 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Q3 2026 Money Bubbles</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one column. Masthead, office toggle + totals, packed bubble field (D left, R right; stacked on phones), table view. Click a bubble for a side drawer (bottom sheet on phones). */
+:root {
+  --bg: #eef0f4;
+  --surface: #ffffff;
+  --line: #d3d7df;
+  --grid: #e3e6ec;
+  --fg: #161a22;
+  --muted: #5a6273;
+  --faint: #8a91a0;
+  --accent: #1f4fd1;
+  --dem: #2a78d6;
+  --gop: #e34948;
+  --ind: #1baf7a;
+  --dem-ink: #1d5fae;
+  --gop-ink: #b8302f;
+  --ind-ink: #137a55;
+  --dem-wash: #e2ecf9;
+  --gop-wash: #fbe5e5;
+  --ind-wash: #ddf3ea;
+  --scrim: rgba(15, 20, 35, .35);
+  --shadow: 0 12px 40px rgba(15, 20, 35, .22);
+
+  --font-display: 'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', sans-serif;
+  --font-body: 'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12151b; --surface: #1b1f27; --line: #2f3542; --grid: #252a34;
+    --fg: #eef0f4; --muted: #a8afbd; --faint: #7a8293; --accent: #7aa2ff;
+    --dem: #3987e5; --gop: #e66767; --ind: #199e70;
+    --dem-ink: #8cbaf2; --gop-ink: #f29a9a; --ind-ink: #6fd3ab;
+    --dem-wash: #1c2a3f; --gop-wash: #3a2126; --ind-wash: #173329;
+    --scrim: rgba(0, 0, 0, .55); --shadow: 0 12px 40px rgba(0, 0, 0, .5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12151b; --surface: #1b1f27; --line: #2f3542; --grid: #252a34;
+  --fg: #eef0f4; --muted: #a8afbd; --faint: #7a8293; --accent: #7aa2ff;
+  --dem: #3987e5; --gop: #e66767; --ind: #199e70;
+  --dem-ink: #8cbaf2; --gop-ink: #f29a9a; --ind-ink: #6fd3ab;
+  --dem-wash: #1c2a3f; --gop-wash: #3a2126; --ind-wash: #173329;
+  --scrim: rgba(0, 0, 0, .55); --shadow: 0 12px 40px rgba(0, 0, 0, .5);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; font-size: 14px; background: var(--bg); color: var(--fg); font-family: var(--font-body); line-height: 1.45; }
+.wrap {
+  max-width: 1120px; margin: 0 auto;
+  padding-block: 28px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 20px;
+}
+.wrap > * { min-width: 0; }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(34px, 6vw, 52px); line-height: 1; margin: 6px 0 8px; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 64ch; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; }
+.seg { display: inline-flex; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.seg button {
+  font: 600 14px/1 var(--font-body); color: var(--muted); background: none; border: 0;
+  padding: 9px 18px; border-radius: 999px; cursor: pointer;
+}
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.seg button:focus-visible, .bubble:focus-visible, .linkish:focus-visible, .x:focus-visible, tbody tr:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.totals { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.totals b { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--fg); margin-right: 4px; }
+.key { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
+.dot.D { background: var(--dem); } .dot.R { background: var(--gop); } .dot.I { background: var(--ind); }
+.dot.nr { background: none; border: 1.5px dashed var(--faint); }
+
+.stage { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; position: relative; overflow: hidden; }
+#chart { display: block; width: 100%; }
+#chart text { pointer-events: none; }
+.bubble { cursor: pointer; outline: none; }
+.bubble circle.body { stroke: var(--surface); stroke-width: 2; transition: opacity .15s; }
+.bubble.nr circle.body { fill: var(--surface); stroke: var(--faint); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.bubble .ring { fill: none; stroke: var(--fg); stroke-width: 2.5; opacity: 0; }
+.bubble.sel .ring { opacity: 1; }
+.bubble.opp .ring { opacity: .7; stroke-dasharray: 3 3; }
+.bubble:hover circle.body { opacity: .85; }
+.lbl-name { font: 600 12px var(--font-body); fill: #fff; text-anchor: middle; }
+.lbl-amt { font: 700 15px var(--font-display); fill: #fff; text-anchor: middle; font-variant-numeric: tabular-nums; }
+.lbl-st { font: 600 10px var(--font-body); fill: #fff; opacity: .85; text-anchor: middle; letter-spacing: .06em; }
+.nr .lbl-name, .nr .lbl-st, .nr .lbl-amt { fill: var(--muted); }
+.side-lbl { font: 700 13px var(--font-body); letter-spacing: .1em; text-transform: uppercase; }
+.side-lbl.D { fill: var(--dem-ink); } .side-lbl.R { fill: var(--gop-ink); } .side-lbl.I { fill: var(--ind-ink); }
+.side-sub { font: 500 12px var(--font-body); fill: var(--muted); }
+.size-key circle { fill: none; stroke: var(--faint); stroke-width: 1; }
+.size-key text { font: 500 11px var(--font-body); fill: var(--muted); }
+
+.tip {
+  position: absolute; pointer-events: none; background: var(--fg); color: var(--bg);
+  padding: 8px 10px; border-radius: 8px; font-size: 13px; line-height: 1.35; max-width: 240px;
+  box-shadow: var(--shadow); transform: translate(-50%, calc(-100% - 12px)); white-space: nowrap;
+}
+.tip b { font-weight: 700; }
+.tip span { opacity: .75; }
+.hint { position: absolute; left: 14px; bottom: 10px; font-size: 12px; color: var(--faint); }
+
+.note { font-size: 13px; color: var(--muted); max-width: 80ch; margin: 0; }
+
+h2 { font-family: var(--font-display); font-size: 26px; font-weight: 700; margin: 8px 0 0; }
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+td.n, th.n { text-align: right; }
+tbody tr { cursor: pointer; }
+tbody tr:hover { background: var(--bg); }
+tbody tr:last-child td { border-bottom: 0; }
+.na { color: var(--faint); }
+
+/* Drawer */
+.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 20; }
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(440px, 100%); z-index: 21;
+  background: var(--surface); box-shadow: var(--shadow); overflow-y: auto;
+  padding-top: max(20px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(28px, env(safe-area-inset-bottom, 0px));
+  padding-right: max(22px, env(safe-area-inset-right, 0px));
+  padding-left: 22px;
+  display: grid; gap: 22px; align-content: start;
+}
+@media (max-width: 640px) {
+  .drawer { top: auto; width: 100%; max-height: 86vh; border-radius: 16px 16px 0 0; padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px)); }
+}
+.d-head { display: grid; gap: 4px; position: relative; padding-right: 40px; }
+.x { position: absolute; top: -4px; right: 0; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; font-size: 18px; line-height: 1; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; width: fit-content; }
+.chip.D { background: var(--dem-wash); color: var(--dem-ink); }
+.chip.R { background: var(--gop-wash); color: var(--gop-ink); }
+.chip.I { background: var(--ind-wash); color: var(--ind-ink); }
+.d-name { font-family: var(--font-display); font-weight: 700; font-size: 36px; line-height: 1.05; margin: 4px 0 0; }
+.linkish { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.d-sec { display: grid; gap: 12px; }
+.d-sec h3 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border-top: 1px solid var(--grid); padding-top: 14px; }
+.d-sec h3 small { text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--faint); margin-left: 6px; }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.stat { background: var(--bg); border-radius: 10px; padding: 10px 12px; display: grid; gap: 2px; min-width: 0; }
+.stat .v { font-family: var(--font-display); font-size: 28px; font-weight: 700; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.stat .k { font-size: 12px; color: var(--muted); }
+.stat.missing .v { color: var(--faint); font-size: 20px; }
+.meter { display: grid; gap: 5px; }
+.meter .row { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
+.meter .row b { font-variant-numeric: tabular-nums; }
+.track { height: 10px; border-radius: 999px; background: var(--grid); overflow: hidden; display: flex; gap: 2px; }
+.track i { display: block; height: 100%; border-radius: 999px; }
+.fill-D { background: var(--dem); } .fill-R { background: var(--gop); } .fill-I { background: var(--ind); }
+.fill-muted { background: var(--faint); }
+.h2h-legend { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
+.h2h-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.prose { font-size: 14px; margin: 0; }
+.prose + .prose { margin-top: -4px; }
+.lab { font-weight: 600; }
+.empty { font-size: 14px; color: var(--muted); background: var(--bg); border-radius: 10px; padding: 12px; margin: 0; }
+.src { font-size: 12px; color: var(--muted); margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+.src a { color: var(--accent); word-break: break-all; }
+.src li { word-break: break-word; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+
+<main class="wrap">
+  <header>
+    <span class="eyebrow">2026 midterms · Q3 fundraising · as of Oct 16, 2026</span>
+    <h1>Who raised what</h1>
+    <p class="lede">Each bubble is a candidate, sized by money raised. Democrats sit left, Republicans right. Click a bubble to see that candidate's donor profile: average gift, small-dollar share, in-state share, and head-to-head totals.</p>
+  </header>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Office">
+      <button type="button" id="v-senate" aria-pressed="true" data-office="Senate">Senate</button>
+      <button type="button" id="v-gov" aria-pressed="false" data-office="Governor">Governor</button>
+    </div>
+    <div class="totals" id="totals"></div>
+  </div>
+
+  <div class="stage" id="stage">
+    <svg id="chart" role="img" aria-label="Packed bubble chart of candidates"></svg>
+    <div class="tip" id="tip" hidden></div>
+    <span class="hint">Dashed bubble = figure not yet reported</span>
+  </div>
+  <p class="note" id="viewnote"></p>
+
+  <section>
+    <h2 id="tbl-title">All Senate candidates</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Candidate</th><th>State</th><th>Party</th><th class="n">Raised</th><th class="n">Cash on hand</th><th class="n">Avg gift</th><th class="n">Gifts ≤ $100</th><th>Period</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+  <p class="note" id="compiled"></p>
+</main>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="d-name" hidden></aside>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+const DATA = {
+ "candidates": [
+  {
+   "office": "Senate",
+   "state": "TX",
+   "name": "James Talarico",
+   "party": "D",
+   "raised": 64,
+   "coh": 14.6,
+   "opp": "Ken Paxton",
+   "oppRaised": 18,
+   "oppCoh": 4.9,
+   "outside": "Texas PAC (SLF-linked) ~$131M spent; MAGA Inc ~$24M; GOP outside groups $175M+ since Sep 1; Lone Star Rising PAC ~$3.7M pro-Talarico; WinSenate $2.1M ad. Race tops $500M in ad spending/reservations.",
+   "notes": "Record Q3 for any Senate candidate (prior: Harrison, $57M in 2020). 97% of gifts under $100; cycle total $134M+. Paxton figure combines campaign + 2 affiliated committees. Principal committees alone (FEC via VoteHub): Talarico $60.2M, Paxton $10.2M. COH shown is principal committee at Sep 30.",
+   "sources": "x.com/VoteHub/status/2111102458868945293 ; texastribune.org/2026/10/15/james-talarico-64-million-fundraising-texas-senate/ ; cnbc.com/2026/10/15/james-talarico-texas-senate-fundraising-ken-paxton.html ; ksat.com 2026/10/01 Senate GOP spending records",
+   "period": "Q3 2026 (Jul 1 - Sep 30)",
+   "donors": {
+    "period": "Q3 2026",
+    "avgGift": null,
+    "smallShare": 0.97,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": null,
+    "details": "1.3M+ donors over the cycle (campaign). Avg gift not reported; do not divide $64M by cycle donors.",
+    "sources": "texastribune.org 2026/10/15 ; bizpacreview/DCNF 2026/10/15"
+   }
+  },
+  {
+   "office": "Senate",
+   "state": "TX",
+   "name": "Ken Paxton",
+   "party": "R",
+   "raised": 18,
+   "coh": 4.9,
+   "opp": "James Talarico",
+   "oppRaised": 64,
+   "oppCoh": 14.6,
+   "outside": "Texas PAC (SLF-linked) ~$131M spent; MAGA Inc ~$24M; GOP outside groups $175M+ since Sep 1; Lone Star Rising PAC ~$3.7M pro-Talarico; WinSenate $2.1M ad. Race tops $500M in ad spending/reservations.",
+   "notes": "Record Q3 for any Senate candidate (prior: Harrison, $57M in 2020). 97% of gifts under $100; cycle total $134M+. Paxton figure combines campaign + 2 affiliated committees. Principal committees alone (FEC via VoteHub): Talarico $60.2M, Paxton $10.2M. COH shown is principal committee at Sep 30.",
+   "sources": "x.com/VoteHub/status/2111102458868945293 ; texastribune.org/2026/10/15/james-talarico-64-million-fundraising-texas-senate/ ; cnbc.com/2026/10/15/james-talarico-texas-senate-fundraising-ken-paxton.html ; ksat.com 2026/10/01 Senate GOP spending records",
+   "period": "Q3 2026 (Jul 1 - Sep 30)",
+   "donors": {
+    "period": "Through Jun 30",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": ">50%",
+    "details": "OpenSecrets: one of 3 leading candidates raising more in-state than out-of-state.",
+    "sources": "keyt.com/Stacker (OpenSecrets) 2026/08/27"
+   }
+  },
+  {
+   "office": "Senate",
+   "state": "GA",
+   "name": "Jon Ossoff",
+   "party": "D",
+   "raised": 33,
+   "coh": 26,
+   "opp": "Mike Collins",
+   "oppRaised": 2.8,
+   "oppCoh": 1.1,
+   "outside": "SLF initially committed $44M vs Ossoff; GOP groups shifting money to AK/KS/OH. Dem PACs pulled GA spending (comfortable lead).",
+   "notes": "760K+ contributions, avg $46. Cycle total $100M+. Collins $2.8M per CNN; AJC reports $2.7M incl. transfers and ~$1.0M COH.",
+   "sources": "wabe.org Ossoff $33M ; cnn.com/2026/10/15 live updates ; ajc.com/politics/2026/10/jon-ossoff-hauls-in-33m",
+   "period": "Q3 2026 (Jul 1 - Sep 30)",
+   "donors": {
+    "period": "Q3 2026",
+    "avgGift": 46,
+    "smallShare": 0.97,
+    "count": 760000,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": null,
+    "details": "Count = contributions, not unique donors. Gifts from all 159 GA counties since Jan 2025. ~$52.9M from outside GA through Jun 30 (OpenSecrets).",
+    "sources": "electjon.com Q3 release ; wabe.org ; keyt.com/Stacker"
+   }
+  },
+  {
+   "office": "Senate",
+   "state": "GA",
+   "name": "Mike Collins",
+   "party": "R",
+   "raised": 2.8,
+   "coh": 1.1,
+   "opp": "Jon Ossoff",
+   "oppRaised": 33,
+   "oppCoh": 26,
+   "outside": "SLF initially committed $44M vs Ossoff; GOP groups shifting money to AK/KS/OH. Dem PACs pulled GA spending (comfortable lead).",
+   "notes": "760K+ contributions, avg $46. Cycle total $100M+. Collins $2.8M per CNN; AJC reports $2.7M incl. transfers and ~$1.0M COH.",
+   "sources": "wabe.org Ossoff $33M ; cnn.com/2026/10/15 live updates ; ajc.com/politics/2026/10/jon-ossoff-hauls-in-33m",
+   "period": "Q3 2026 (Jul 1 - Sep 30)"
+  },
+  {
+   "office": "Senate",
+   "state": "OH",
+   "name": "Sherrod Brown",
+   "party": "D",
+   "raised": 28.2,
+   "coh": null,
+   "opp": "Jon Husted",
+   "oppRaised": 4.8,
+   "oppCoh": null,
+   "outside": "SLF planned $79M for Husted (largest single SLF commitment). Outside groups have spent ~$350M on the race (AdImpact).",
+   "notes": "Brown: $28.2M across committees, $23.1M to principal committee; ~200K donors, avg $40. Brown has outraised Husted 5 straight quarters. 6/30 COH: Brown $16.2M, Husted $9.4M.",
+   "sources": "spectrumnews1.com 2026/10/15 ohio-senate-q3 ; semafor.com 2026/10/15 ; notus.org Brown fundraising",
+   "period": "Q3 2026 (Jul 1 - Sep 30)",
+   "donors": {
+    "period": "Q3 2026",
+    "avgGift": 40,
+    "smallShare": null,
+    "count": 200000,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": null,
+    "details": "~200K donors (campaign). Q3 2025 avg was $24.36 with 97% under $100. Q4 2025 bulk via ActBlue small-dollar.",
+    "sources": "spectrumnews1.com 2026/10/15 ; wyso.org 2025/10/15"
+   }
+  },
+  {
+   "office": "Senate",
+   "state": "OH",
+   "name": "Jon Husted",
+   "party": "R",
+   "raised": 4.8,
+   "coh": null,
+   "opp": "Sherrod Brown",
+   "oppRaised": 28.2,
+   "oppCoh": null,
+   "outside": "SLF planned $79M for Husted (largest single SLF commitment). Outside groups have spent ~$350M on the race (AdImpact).",
+   "notes": "Brown: $28.2M across committees, $23.1M to principal committee; ~200K donors, avg $40. Brown has outraised Husted 5 straight quarters. 6/30 COH: Brown $16.2M, Husted $9.4M.",
+   "sources": "spectrumnews1.com 2026/10/15 ohio-senate-q3 ; semafor.com 2026/10/15 ; notus.org Brown fundraising",
+   "period": "Q3 2026 (Jul 1 - Sep 30)",
+   "donors": {
+    "period": "Through Jun 30",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": ">50%",
+    "details": "OpenSecrets: raised more in-state than out-of-state. Backed by several building-trades unions that previously backed Brown.",
+    "sources": "keyt.com/Stacker ; thewellnews.com"
+   }
+  },
+  {
+   "office": "Senate",
+   "state": "MI",
+   "name": "Abdul El-Sayed",
+   "party": "D",
+   "raised": 30.66,
+   "coh": 3.8,
+   "opp": "Mike Rogers",
+   "oppRaised": 9.66,
+   "oppCoh": 6.5,
+   "outside": "SLF ~$53M planned; No Going Back (MAGA Inc offshoot) $22.3M; AFP Action $20M; Great Lakes Conservatives Fund $12M; Musk's America PAC ~$6M. SMP/WinSenate ~$30M TV plan. Race >$268M, a state record.",
+   "notes": "Detroit News totals shown. HuffPost reports $25.6M vs $6.9M (likely principal-committee contributions only). Rogers' best quarter of the cycle.",
+   "sources": "detroitnews.com 2026/10/15 el-sayed triples rogers ; detroitnews.com 2026/10/09 spending record ; huffpost live updates 10/15",
+   "period": "Q3 2026 (Jul 1 - Sep 30)",
+   "donors": {
+    "period": "Through Jun 30",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": "<50%",
+    "details": "'Well over half' from out of state through Jun 30 (OpenSecrets). Detroit News reports a post-primary surge in giving.",
+    "sources": "keyt.com/Stacker ; detroitnews.com 2026/10/15"
+   }
+  },
+  {
+   "office": "Senate",
+   "state": "MI",
+   "name": "Mike Rogers",
+   "party": "R",
+   "raised": 9.66,
+   "coh": 6.5,
+   "opp": "Abdul El-Sayed",
+   "oppRaised": 30.66,
+   "oppCoh": 3.8,
+   "outside": "SLF ~$53M planned; No Going Back (MAGA Inc offshoot) $22.3M; AFP Action $20M; Great Lakes Conservatives Fund $12M; Musk's America PAC ~$6M. SMP/WinSenate ~$30M TV plan. Race >$268M, a state record.",
+   "notes": "Detroit News totals shown. HuffPost reports $25.6M vs $6.9M (likely principal-committee contributions only). Rogers' best quarter of the cycle.",
+   "sources": "detroitnews.com 2026/10/15 el-sayed triples rogers ; detroitnews.com 2026/10/09 spending record ; huffpost live updates 10/15",
+   "period": "Q3 2026 (Jul 1 - Sep 30)",
+   "donors": {
+    "period": "Q3 2026",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": "<50%",
+    "details": "~35% of Q3 total from donors who gave to AIPAC or allied committees this cycle (Detroit News). In-state share: 'well over half' out-of-state through Jun 30 (OpenSecrets, both MI nominees).",
+    "sources": "detroitnews.com 2026/10/15 ; keyt.com/Stacker"
+   }
+  },
+  {
+   "office": "Senate",
+   "state": "ME",
+   "name": "Troy Jackson",
+   "party": "D",
+   "raised": 20.4,
+   "coh": 4,
+   "opp": "Susan Collins",
+   "oppRaised": 5.2,
+   "oppCoh": 5.4,
+   "outside": "Pro-Collins groups $85.3M in ads since late July (about 7x her own + party spend); pro-Jackson groups $53.9M. SLF $42M commitment (Jan).",
+   "notes": "Jackson's first quarter (became nominee late July after Platner withdrew). Spent $16.5M; ~$1M vendor debt. Collins spent $10.9M. Collins Q3 reported as $5.2M (AP/BDN/CNN), $3.9M (Press Herald), $5.4M (HuffPost).",
+   "sources": "bangordailynews.com 2026/10/15 troy-jackson-fundraising ; pressherald.com 2026/10/15 ; boston.com AP 10/15",
+   "period": "Q3 2026 (Jul 1 - Sep 30)",
+   "donors": {
+    "period": "Q3 2026",
+    "avgGift": 97,
+    "smallShare": 0.95,
+    "count": 200000,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": null,
+    "details": "~$19.4M from individuals, ~$1M from other committees incl. union PACs. Gifts from all 16 counties. Pledged no corporate PAC money. Avg gift (col F) derived: $19.4M / ~200K donors.",
+    "sources": "pressherald.com 2026/10/15 ; statedrecord.com"
+   }
+  },
+  {
+   "office": "Senate",
+   "state": "ME",
+   "name": "Susan Collins",
+   "party": "R",
+   "raised": 5.2,
+   "coh": 5.4,
+   "opp": "Troy Jackson",
+   "oppRaised": 20.4,
+   "oppCoh": 4,
+   "outside": "Pro-Collins groups $85.3M in ads since late July (about 7x her own + party spend); pro-Jackson groups $53.9M. SLF $42M commitment (Jan).",
+   "notes": "Jackson's first quarter (became nominee late July after Platner withdrew). Spent $16.5M; ~$1M vendor debt. Collins spent $10.9M. Collins Q3 reported as $5.2M (AP/BDN/CNN), $3.9M (Press Herald), $5.4M (HuffPost).",
+   "sources": "bangordailynews.com 2026/10/15 troy-jackson-fundraising ; pressherald.com 2026/10/15 ; boston.com AP 10/15",
+   "period": "Q3 2026 (Jul 1 - Sep 30)",
+   "donors": {
+    "period": "Q3 2026",
+    "avgGift": null,
+    "smallShare": 0.67,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": 0.11,
+    "details": "~2/3 of individual gifts under $100. FL, TX, CA, NY donors gave 3x+ what Maine donors gave. Through Jun 30: ~93% out-of-state (OpenSecrets). Some out-of-state $ subject to refund.",
+    "sources": "pressherald.com 2026/10/15 ; keyt.com/Stacker"
+   }
+  },
+  {
+   "office": "Senate",
+   "state": "NC",
+   "name": "Roy Cooper",
+   "party": "D",
+   "raised": 19.5,
+   "coh": null,
+   "opp": "Michael Whatley",
+   "oppRaised": 2,
+   "oppCoh": null,
+   "outside": "SLF pledged $71M but spent under half, then cancelled ads in early Oct. SMP committed $32M to Cooper.",
+   "notes": "Whatley ~$2M per Axios (rounded; filed late Oct 15). 6/30 COH: Cooper $20.7M, Whatley ~$3.5M. 95%+ of Cooper gifts $100 or less.",
+   "sources": "roycooper.com Q3 release ; axios.com 2026/10/16 democrats-midterms-fundraising-senate ; wral.com Whatley retreats",
+   "period": "Q3 2026 (Jul 1 - Sep 30)",
+   "donors": {
+    "period": "Q3 2026",
+    "avgGift": null,
+    "smallShare": 0.95,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": ">50%",
+    "details": "95%+ of gifts $100 or less; gifts from all 100 counties. In-state majority per OpenSecrets (through Jun 30).",
+    "sources": "roycooper.com ; keyt.com/Stacker"
+   }
+  },
+  {
+   "office": "Senate",
+   "state": "NC",
+   "name": "Michael Whatley",
+   "party": "R",
+   "raised": 2,
+   "coh": null,
+   "opp": "Roy Cooper",
+   "oppRaised": 19.5,
+   "oppCoh": null,
+   "outside": "SLF pledged $71M but spent under half, then cancelled ads in early Oct. SMP committed $32M to Cooper.",
+   "notes": "Whatley ~$2M per Axios (rounded; filed late Oct 15). 6/30 COH: Cooper $20.7M, Whatley ~$3.5M. 95%+ of Cooper gifts $100 or less.",
+   "sources": "roycooper.com Q3 release ; axios.com 2026/10/16 democrats-midterms-fundraising-senate ; wral.com Whatley retreats",
+   "period": "Q3 2026 (Jul 1 - Sep 30)"
+  },
+  {
+   "office": "Senate",
+   "state": "AK",
+   "name": "Mary Peltola",
+   "party": "D",
+   "raised": 17,
+   "coh": 3.2,
+   "opp": "Dan Sullivan",
+   "oppRaised": 2.7,
+   "oppCoh": 5.1,
+   "outside": "SLF $17M committed for Sullivan; SMP $12M+ in TV reservations for Peltola.",
+   "notes": "Peltola's largest quarter; spent nearly $20M in Q3. Sullivan spent ~$5.9M. Sullivan raised ~$2.7M per FEC (HuffPost rounded to $2M).",
+   "sources": "alaskalandmine.com Sullivan and Begich retain cash advantages ; yahoo.com Peltola raises $17M (10/13)",
+   "period": "Q3 2026 (Jul 1 - Sep 30)",
+   "donors": {
+    "period": "Through Jun 30",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": 0.1,
+    "details": "~90% out-of-state (OpenSecrets). Alaska race overall: 88% of itemized $ out-of-state.",
+    "sources": "keyt.com/Stacker ; themidtermproject.org"
+   }
+  },
+  {
+   "office": "Senate",
+   "state": "AK",
+   "name": "Dan Sullivan",
+   "party": "R",
+   "raised": 2.7,
+   "coh": 5.1,
+   "opp": "Mary Peltola",
+   "oppRaised": 17,
+   "oppCoh": 3.2,
+   "outside": "SLF $17M committed for Sullivan; SMP $12M+ in TV reservations for Peltola.",
+   "notes": "Peltola's largest quarter; spent nearly $20M in Q3. Sullivan spent ~$5.9M. Sullivan raised ~$2.7M per FEC (HuffPost rounded to $2M).",
+   "sources": "alaskalandmine.com Sullivan and Begich retain cash advantages ; yahoo.com Peltola raises $17M (10/13)",
+   "period": "Q3 2026 (Jul 1 - Sep 30)",
+   "donors": {
+    "period": "Through Jun 30",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": 0.15,
+    "details": "At least 85% out-of-state (shown as upper-bound in-state share).",
+    "sources": "keyt.com/Stacker"
+   }
+  },
+  {
+   "office": "Senate",
+   "state": "KS",
+   "name": "Adam Hamilton",
+   "party": "D",
+   "raised": 10.6,
+   "coh": null,
+   "opp": "Roger Marshall",
+   "oppRaised": 0.866,
+   "oppCoh": null,
+   "outside": "SLF ~$8.2M reserved (AdImpact); reported plan up to $14M. $37M+ in ads set to air in final weeks.",
+   "notes": "Hamilton $10.6M incl. joint fundraising committees; $9.4M to principal campaign (CNN).",
+   "sources": "politicalwire.com 2026/10/13 ; cnn.com live updates 10/15 ; kctv5.com 2026/10/02",
+   "period": "Q3 2026 (Jul 1 - Sep 30)"
+  },
+  {
+   "office": "Senate",
+   "state": "KS",
+   "name": "Roger Marshall",
+   "party": "R",
+   "raised": 0.866,
+   "coh": null,
+   "opp": "Adam Hamilton",
+   "oppRaised": 10.6,
+   "oppCoh": null,
+   "outside": "SLF ~$8.2M reserved (AdImpact); reported plan up to $14M. $37M+ in ads set to air in final weeks.",
+   "notes": "Hamilton $10.6M incl. joint fundraising committees; $9.4M to principal campaign (CNN).",
+   "sources": "politicalwire.com 2026/10/13 ; cnn.com live updates 10/15 ; kctv5.com 2026/10/02",
+   "period": "Q3 2026 (Jul 1 - Sep 30)"
+  },
+  {
+   "office": "Senate",
+   "state": "NH",
+   "name": "Chris Pappas",
+   "party": "D",
+   "raised": 8.1,
+   "coh": null,
+   "opp": "John E. Sununu",
+   "oppRaised": 1.1,
+   "oppCoh": null,
+   "outside": "SLF included NH among its 8-state $342M plan.",
+   "notes": "Semafor: Pappas raised $8.1M. HuffPost phrasing: Pappas 'banked' $5.7M vs Sununu $1.1M (may be principal-committee or COH; unclear).",
+   "sources": "semafor.com 2026/10/15 ; huffpost live updates 10/15",
+   "period": "Q3 2026 (Jul 1 - Sep 30)"
+  },
+  {
+   "office": "Senate",
+   "state": "NH",
+   "name": "John E. Sununu",
+   "party": "R",
+   "raised": 1.1,
+   "coh": null,
+   "opp": "Chris Pappas",
+   "oppRaised": 8.1,
+   "oppCoh": null,
+   "outside": "SLF included NH among its 8-state $342M plan.",
+   "notes": "Semafor: Pappas raised $8.1M. HuffPost phrasing: Pappas 'banked' $5.7M vs Sununu $1.1M (may be principal-committee or COH; unclear).",
+   "sources": "semafor.com 2026/10/15 ; huffpost live updates 10/15",
+   "period": "Q3 2026 (Jul 1 - Sep 30)",
+   "donors": {
+    "period": "Through Jun 30",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": 0.15,
+    "details": "At least 85% out-of-state (upper-bound in-state share).",
+    "sources": "keyt.com/Stacker"
+   }
+  },
+  {
+   "office": "Senate",
+   "state": "IA",
+   "name": "Josh Turek",
+   "party": "D",
+   "raised": 12,
+   "coh": null,
+   "opp": "Ashley Hinson",
+   "oppRaised": 3.2,
+   "oppCoh": null,
+   "outside": "SLF designated $29M for Iowa.",
+   "notes": "Open seat (Ernst retiring). Figures from HuffPost FEC roundup.",
+   "sources": "huffpost live updates 10/15",
+   "period": "Q3 2026 (Jul 1 - Sep 30)",
+   "donors": {
+    "period": "Through Jun 30",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": "<50%",
+    "details": "'Well over half' of each candidate's individual $ from out of state.",
+    "sources": "keyt.com/Stacker",
+    "shared": "Turek / Hinson"
+   }
+  },
+  {
+   "office": "Senate",
+   "state": "IA",
+   "name": "Ashley Hinson",
+   "party": "R",
+   "raised": 3.2,
+   "coh": null,
+   "opp": "Josh Turek",
+   "oppRaised": 12,
+   "oppCoh": null,
+   "outside": "SLF designated $29M for Iowa.",
+   "notes": "Open seat (Ernst retiring). Figures from HuffPost FEC roundup.",
+   "sources": "huffpost live updates 10/15",
+   "period": "Q3 2026 (Jul 1 - Sep 30)",
+   "donors": {
+    "period": "Through Jun 30",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": "<50%",
+    "details": "'Well over half' of each candidate's individual $ from out of state.",
+    "sources": "keyt.com/Stacker",
+    "shared": "Turek / Hinson"
+   }
+  },
+  {
+   "office": "Senate",
+   "state": "SC",
+   "name": "Annie Andrews",
+   "party": "D",
+   "raised": 9,
+   "coh": null,
+   "opp": "Darline Graham",
+   "oppRaised": 0.786,
+   "oppCoh": null,
+   "outside": "SLF $5M late buy for Graham.",
+   "notes": "Darline Graham appointed after Sen. Lindsey Graham's death; won quick primary.",
+   "sources": "huffpost live updates 10/15 ; axios.com 2026/10/06",
+   "period": "Q3 2026 (Jul 1 - Sep 30)"
+  },
+  {
+   "office": "Senate",
+   "state": "SC",
+   "name": "Darline Graham",
+   "party": "R",
+   "raised": 0.786,
+   "coh": null,
+   "opp": "Annie Andrews",
+   "oppRaised": 9,
+   "oppCoh": null,
+   "outside": "SLF $5M late buy for Graham.",
+   "notes": "Darline Graham appointed after Sen. Lindsey Graham's death; won quick primary.",
+   "sources": "huffpost live updates 10/15 ; axios.com 2026/10/06",
+   "period": "Q3 2026 (Jul 1 - Sep 30)"
+  },
+  {
+   "office": "Senate",
+   "state": "MN",
+   "name": "Peggy Flanagan",
+   "party": "D",
+   "raised": 4.3,
+   "coh": 1.5,
+   "opp": "Michele Tafoya",
+   "oppRaised": 4.9,
+   "oppCoh": 2.1,
+   "outside": "Comparatively little national party/outside spending.",
+   "notes": "Only key race where the Republican outraised. Figures span pre-primary report (first 3 weeks of July) + Q3 report.",
+   "sources": "cnn.com live updates 10/15",
+   "period": "Q3 2026 (Jul 1 - Sep 30)",
+   "donors": {
+    "period": "Cycle",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": null,
+    "details": "Refuses corporate PAC money.",
+    "sources": "minnpost.com 2026/10"
+   }
+  },
+  {
+   "office": "Senate",
+   "state": "MN",
+   "name": "Michele Tafoya",
+   "party": "R",
+   "raised": 4.9,
+   "coh": 2.1,
+   "opp": "Peggy Flanagan",
+   "oppRaised": 4.3,
+   "oppCoh": 1.5,
+   "outside": "Comparatively little national party/outside spending.",
+   "notes": "Only key race where the Republican outraised. Figures span pre-primary report (first 3 weeks of July) + Q3 report.",
+   "sources": "cnn.com live updates 10/15",
+   "period": "Q3 2026 (Jul 1 - Sep 30)"
+  },
+  {
+   "office": "Senate",
+   "state": "NE",
+   "name": "Dan Osborn",
+   "party": "I",
+   "raised": null,
+   "coh": null,
+   "opp": "Pete Ricketts",
+   "oppRaised": null,
+   "oppCoh": null,
+   "outside": "SLF ~$7M spent via Cornhusker Majority PAC, adding $8M more.",
+   "notes": "Q3 totals not yet published by either campaign or processed by FEC (FEC page for Osborn still shows mid-year totals: $5.76M raised, $2.42M COH). 6/30: Ricketts $11.2M cycle, $6.9M COH (incl. $5.2M self-funding in Q2).",
+   "sources": "ivn.us 2026/10/14 ; bloomberg.com 2026/10/13",
+   "period": "Q3 2026 (Jul 1 - Sep 30)",
+   "donors": {
+    "period": "Q2 2026",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": null,
+    "details": "Top donor states in Q2: CA, then NE, then NY. Outraised Ricketts in individual contributions by $1.3M in Q2.",
+    "sources": "nebraskaexaminer.com 2026/07/28 ; theindependent.com"
+   }
+  },
+  {
+   "office": "Senate",
+   "state": "NE",
+   "name": "Pete Ricketts",
+   "party": "R",
+   "raised": null,
+   "coh": null,
+   "opp": "Dan Osborn",
+   "oppRaised": null,
+   "oppCoh": null,
+   "outside": "SLF ~$7M spent via Cornhusker Majority PAC, adding $8M more.",
+   "notes": "Q3 totals not yet published by either campaign or processed by FEC (FEC page for Osborn still shows mid-year totals: $5.76M raised, $2.42M COH). 6/30: Ricketts $11.2M cycle, $6.9M COH (incl. $5.2M self-funding in Q2).",
+   "sources": "ivn.us 2026/10/14 ; bloomberg.com 2026/10/13",
+   "period": "Q3 2026 (Jul 1 - Sep 30)",
+   "donors": {
+    "period": "Q2 2026",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": null,
+    "details": "$5.2M of $6.3M Q2 haul was self-funding. Top donor states: NE, NY, IL.",
+    "sources": "nebraskaexaminer.com 2026/07/28"
+   }
+  },
+  {
+   "office": "Governor",
+   "state": "WI",
+   "name": "David Crowley",
+   "party": "D",
+   "raised": 10.2,
+   "coh": null,
+   "opp": "Tom Tiffany",
+   "oppRaised": 26.3,
+   "oppCoh": 12,
+   "outside": "DGA $10M+. ~$4M of Crowley's haul via state party, unions, PACs.",
+   "notes": "Tiffany: $24M+ of his haul from 3 billionaires routed through state GOP; spent ~$19M. Open seat (Evers retiring).",
+   "sources": "wpr.org 2026/10/01 ; wisconsinexaminer.com 2026/10/01",
+   "period": "Jul 1 - Sep 23",
+   "donors": {
+    "period": "Jul 1 - Sep 23",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": null,
+    "details": "~$4M of $10.2M (~39%) via state party, unions, and PACs.",
+    "sources": "wpr.org 2026/10/01"
+   }
+  },
+  {
+   "office": "Governor",
+   "state": "WI",
+   "name": "Tom Tiffany",
+   "party": "R",
+   "raised": 26.3,
+   "coh": 12,
+   "opp": "David Crowley",
+   "oppRaised": 10.2,
+   "oppCoh": null,
+   "outside": "DGA $10M+. ~$4M of Crowley's haul via state party, unions, PACs.",
+   "notes": "Tiffany: $24M+ of his haul from 3 billionaires routed through state GOP; spent ~$19M. Open seat (Evers retiring).",
+   "sources": "wpr.org 2026/10/01 ; wisconsinexaminer.com 2026/10/01",
+   "period": "Jul 1 - Sep 23",
+   "donors": {
+    "period": "Jul 1 - Sep 23",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": null,
+    "details": "$24M+ of $26.3M (~92%) from 3 billionaires, routed through the state GOP (no limit on party-to-candidate transfers).",
+    "sources": "wpr.org 2026/10/01 ; pbswisconsin.org"
+   }
+  },
+  {
+   "office": "Governor",
+   "state": "OH",
+   "name": "Amy Acton",
+   "party": "D",
+   "raised": 10.1,
+   "coh": 24.1,
+   "opp": "Vivek Ramaswamy",
+   "oppRaised": null,
+   "oppCoh": 48.7,
+   "outside": "DGA $10M+. Ohio Dem Party was Acton's top Sept donor.",
+   "notes": "Acton $6M in Sept alone, ~2x Ramaswamy's individual donations. Ramaswamy added $5M+ loans (total self-funding $36.3M). Cycle: Acton $30M+, Ramaswamy $55M+. Next report due Oct 22.",
+   "sources": "nbc4i.com 2026/10/12 ; ohiocapitaljournal.com 2026/10/13 ; signalohio.org 2026/10/08",
+   "period": "Aug - Sep (monthly)",
+   "donors": {
+    "period": "Aug - Sep 2026",
+    "avgGift": null,
+    "smallShare": null,
+    "count": 153732,
+    "inStateCount": 77738,
+    "inStateShareCount": 0.505672208778914,
+    "inStateShareDollars": 0.65,
+    "details": "Sept's top donor: Ohio Democratic Party. PAC money leans labor. Ohioans 58% of individual contributions in H1 2026.",
+    "sources": "nbc4i.com 2026/10/12 ; ohiocapitaljournal.com 2026/10/13 ; nbc4i.com 2026/06/29"
+   }
+  },
+  {
+   "office": "Governor",
+   "state": "OH",
+   "name": "Vivek Ramaswamy",
+   "party": "R",
+   "raised": null,
+   "coh": 48.7,
+   "opp": "Amy Acton",
+   "oppRaised": 10.1,
+   "oppCoh": 24.1,
+   "outside": "DGA $10M+. Ohio Dem Party was Acton's top Sept donor.",
+   "notes": "Acton $6M in Sept alone, ~2x Ramaswamy's individual donations. Ramaswamy added $5M+ loans (total self-funding $36.3M). Cycle: Acton $30M+, Ramaswamy $55M+. Next report due Oct 22.",
+   "sources": "nbc4i.com 2026/10/12 ; ohiocapitaljournal.com 2026/10/13 ; signalohio.org 2026/10/08",
+   "period": "Aug - Sep (monthly)",
+   "donors": {
+    "period": "Aug - Sep 2026",
+    "avgGift": null,
+    "smallShare": null,
+    "count": 83818,
+    "inStateCount": 17033,
+    "inStateShareCount": 0.203214106755112,
+    "inStateShareDollars": 0.56,
+    "details": "Self-loans $36.3M total. PAC money leans business (hospital and contractor PACs maxed). Ohioans only 16% of individual contributions in H1 2026. $5M from Elon Musk earlier.",
+    "sources": "nbc4i.com 2026/10/12 ; ohiocapitaljournal.com ; nbc4i.com 2026/06/29 & 2026/08"
+   }
+  },
+  {
+   "office": "Governor",
+   "state": "PA",
+   "name": "Josh Shapiro",
+   "party": "D",
+   "raised": 13.3,
+   "coh": 19.86,
+   "opp": "Stacy Garrity",
+   "oppRaised": 1.8,
+   "oppCoh": 1.37,
+   "outside": "DGA gave Shapiro $1.25M; Shapiro moved $2.5M to state party.",
+   "notes": "Shapiro spent $31.8M in the period; $60M+ raised this cycle. Garrity reports ~$53K debt.",
+   "sources": "lancasterindependence.com 2026/09/22 ; cityandstatepa.com 2026/09",
+   "period": "Jun 9 - Sep 14",
+   "donors": {
+    "period": "Jun 9 - Sep 14",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": null,
+    "details": "Size mix of the itemized $12.94M: $1.1M in gifts <= $50, $1.24M at $50-250, $10.6M (~82%) in gifts > $250. ~$4.3M from PACs incl. $1.25M DGA. 14 six-figure gifts.",
+    "sources": "lancasterindependence.com 2026/09/22 ; cityandstatepa.com"
+   }
+  },
+  {
+   "office": "Governor",
+   "state": "PA",
+   "name": "Stacy Garrity",
+   "party": "R",
+   "raised": 1.8,
+   "coh": 1.37,
+   "opp": "Josh Shapiro",
+   "oppRaised": 13.3,
+   "oppCoh": 19.86,
+   "outside": "DGA gave Shapiro $1.25M; Shapiro moved $2.5M to state party.",
+   "notes": "Shapiro spent $31.8M in the period; $60M+ raised this cycle. Garrity reports ~$53K debt.",
+   "sources": "lancasterindependence.com 2026/09/22 ; cityandstatepa.com 2026/09",
+   "period": "Jun 9 - Sep 14"
+  },
+  {
+   "office": "Governor",
+   "state": "NV",
+   "name": "Aaron Ford",
+   "party": "D",
+   "raised": 5,
+   "coh": null,
+   "opp": "Joe Lombardo",
+   "oppRaised": 16.94,
+   "oppCoh": null,
+   "outside": "Better Nevada PAC raised $15.39M of Lombardo's Q3 total. DGA $10M+. Ford-aligned Forward Nevada PAC.",
+   "notes": "Ford $5M is a campaign claim (Oct 15 release); unclear if it includes Forward Nevada PAC. Lombardo: $1.55M campaign + $15.39M PAC (campaign-reported). COH for both not yet public; Ford ~$2.6M as of July.",
+   "sources": "fordfornevada.com/news (Oct 15) ; nevadacurrent.com 2026/10/15 ; nevadanewsandviews.com",
+   "period": "Q3 (Jul - Sep)",
+   "donors": {
+    "period": "Q2 2026",
+    "avgGift": null,
+    "smallShare": null,
+    "count": 13000,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": null,
+    "details": "Q2: gifts < $100 = 13% of direct $; 64% of $100+ money from out of state; ~90% of gifts $90 or less. AFSCME $500K to allied Forward Nevada PAC.",
+    "sources": "thenevadaindependent.com ; lasvegassun.com"
+   }
+  },
+  {
+   "office": "Governor",
+   "state": "NV",
+   "name": "Joe Lombardo",
+   "party": "R",
+   "raised": 16.94,
+   "coh": null,
+   "opp": "Aaron Ford",
+   "oppRaised": 5,
+   "oppCoh": null,
+   "outside": "Better Nevada PAC raised $15.39M of Lombardo's Q3 total. DGA $10M+. Ford-aligned Forward Nevada PAC.",
+   "notes": "Ford $5M is a campaign claim (Oct 15 release); unclear if it includes Forward Nevada PAC. Lombardo: $1.55M campaign + $15.39M PAC (campaign-reported). COH for both not yet public; Ford ~$2.6M as of July.",
+   "sources": "fordfornevada.com/news (Oct 15) ; nevadacurrent.com 2026/10/15 ; nevadanewsandviews.com",
+   "period": "Q3 (Jul - Sep)",
+   "donors": {
+    "period": "Q3 (and Q2)",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": null,
+    "details": "Q3: $15.39M of $16.94M (~91%) via Better Nevada PAC. Q2: gifts < $100 = 0.4% of direct $; 25% of $100+ money from out of state.",
+    "sources": "nevadacurrent.com 2026/10/15 ; thenevadaindependent.com (Q2)"
+   }
+  },
+  {
+   "office": "Governor",
+   "state": "NY",
+   "name": "Kathy Hochul",
+   "party": "D",
+   "raised": 2.6,
+   "coh": 19,
+   "opp": "Bruce Blakeman",
+   "oppRaised": null,
+   "oppCoh": 0.178,
+   "outside": "State Dem Party transferred $10M to Hochul in Sept, holds ~$11M. Nassau County GOP gave Blakeman $1.3M.",
+   "notes": "Hochul raised $2.6M directly in the 32-day period. Blakeman has received $2.4M in public matching funds and spent nearly everything; NY Dems seek probe of 2,600+ allegedly ineligible matched gifts.",
+   "sources": "investigativepost.org 2026/10/15 ; cityandstateny.com 2026/09 ; nysfocus.com 2026/10/15",
+   "period": "Through September",
+   "donors": {
+    "period": "32-day pre-general",
+    "avgGift": null,
+    "smallShare": null,
+    "count": 17800,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": null,
+    "details": "17,800 individual donors in the period, 4x the comparable 2022 period. Not in public matching program.",
+    "sources": "amny.com ; cityandstateny.com"
+   }
+  },
+  {
+   "office": "Governor",
+   "state": "NY",
+   "name": "Bruce Blakeman",
+   "party": "R",
+   "raised": null,
+   "coh": 0.178,
+   "opp": "Kathy Hochul",
+   "oppRaised": 2.6,
+   "oppCoh": 19,
+   "outside": "State Dem Party transferred $10M to Hochul in Sept, holds ~$11M. Nassau County GOP gave Blakeman $1.3M.",
+   "notes": "Hochul raised $2.6M directly in the 32-day period. Blakeman has received $2.4M in public matching funds and spent nearly everything; NY Dems seek probe of 2,600+ allegedly ineligible matched gifts.",
+   "sources": "investigativepost.org 2026/10/15 ; cityandstateny.com 2026/09 ; nysfocus.com 2026/10/15",
+   "period": "Through September"
+  },
+  {
+   "office": "Governor",
+   "state": "IA",
+   "name": "Rob Sand",
+   "party": "D",
+   "raised": 9.39,
+   "coh": 17.96,
+   "opp": "Zach Lahn",
+   "oppRaised": 6.37,
+   "oppCoh": 1.05,
+   "outside": "DGA $2.5M to Sand; RGA Right Direction PAC $5M+ to Lahn.",
+   "notes": "Most recent filed period; next Iowa report due mid-Oct. Sand cycle total $37.8M (Iowa record).",
+   "sources": "thegazette.com national parties pour millions ; yahoo.com Sand widens cash lead",
+   "period": "May 27 - Jul 14",
+   "donors": {
+    "period": "May 27 - Jul 14",
+    "avgGift": 164,
+    "smallShare": 0.95,
+    "count": 33500,
+    "inStateCount": null,
+    "inStateShareCount": 0.68,
+    "inStateShareDollars": null,
+    "details": "~2,400 gifts from registered Republicans. No spouse/in-law money this period; Lauridsen family has given ~$11.5M cumulatively since 2024. DGA $2.5M.",
+    "sources": "robsand.com 2026/07/20 ; legis1.com"
+   }
+  },
+  {
+   "office": "Governor",
+   "state": "IA",
+   "name": "Zach Lahn",
+   "party": "R",
+   "raised": 6.37,
+   "coh": 1.05,
+   "opp": "Rob Sand",
+   "oppRaised": 9.39,
+   "oppCoh": 17.96,
+   "outside": "DGA $2.5M to Sand; RGA Right Direction PAC $5M+ to Lahn.",
+   "notes": "Most recent filed period; next Iowa report due mid-Oct. Sand cycle total $37.8M (Iowa record).",
+   "sources": "thegazette.com national parties pour millions ; yahoo.com Sand widens cash lead",
+   "period": "May 27 - Jul 14",
+   "donors": {
+    "period": "May 27 - Jul 14",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": null,
+    "details": "RGA Right Direction PAC $5M+ of his $6.4M; $2.5M self-loan over the cycle.",
+    "sources": "thegazette.com ; yahoo.com Sand widens lead"
+   }
+  },
+  {
+   "office": "Governor",
+   "state": "GA",
+   "name": "Keisha Lance Bottoms",
+   "party": "D",
+   "raised": 5.77,
+   "coh": null,
+   "opp": "Rick Jackson",
+   "oppRaised": 118.98,
+   "oppCoh": null,
+   "outside": "DGA $10M+.",
+   "notes": "Jackson is largely self-funded (e.g., $50M in one month); spent ~$114M through July across primary, runoff, general. Bottoms spent ~$5.1M.",
+   "sources": "wrdw.com 2026/10/13 ; transparencyusa.org/ga governor",
+   "period": "Cycle through July"
+  },
+  {
+   "office": "Governor",
+   "state": "GA",
+   "name": "Rick Jackson",
+   "party": "R",
+   "raised": 118.98,
+   "coh": null,
+   "opp": "Keisha Lance Bottoms",
+   "oppRaised": 5.77,
+   "oppCoh": null,
+   "outside": "DGA $10M+.",
+   "notes": "Jackson is largely self-funded (e.g., $50M in one month); spent ~$114M through July across primary, runoff, general. Bottoms spent ~$5.1M.",
+   "sources": "wrdw.com 2026/10/13 ; transparencyusa.org/ga governor",
+   "period": "Cycle through July",
+   "donors": {
+    "period": "Cycle through July",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": null,
+    "details": "Largely self-funded ($50M in one month alone).",
+    "sources": "wrdw.com 2026/10/13"
+   }
+  },
+  {
+   "office": "Governor",
+   "state": "MI",
+   "name": "Jocelyn Benson",
+   "party": "D",
+   "raised": 1.8,
+   "coh": 5.9,
+   "opp": "John James",
+   "oppRaised": 1.2,
+   "oppCoh": 1.5,
+   "outside": "Ad reservations ~$23M (Benson + allies) vs ~$1M (James) as of Oct 1; RGA-backed Michigan Victory Fund pulled broadcast ads. Mission Michigan (pro-James) spent $4.7M+ by late July, funded largely by $6M from Dan and Pamella DeVos. DGA Victory Fund $80K to Benson.",
+   "notes": "Latest filed period. Benson spent $2.3M, James ~$1.1M. James took $371K public funding in the primary. Michigan's pre-general report (through ~Oct 18) lands late Oct. Duggan withdrew in May.",
+   "sources": "hoodline.com 2026/09 ; bridgemi.com 2026/10/13 ; bridgemi.com top donors",
+   "period": "Jul 20 - Aug 24 (post-primary)",
+   "donors": {
+    "period": "Cycle",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": null,
+    "details": "Max PAC gifts from MI League of Conservation Voters, SEIU, UAW, LIUNA. Earlier: 94% of gifts $100 or less.",
+    "sources": "bridgemi.com top donors ; mirs.news"
+   }
+  },
+  {
+   "office": "Governor",
+   "state": "MI",
+   "name": "John James",
+   "party": "R",
+   "raised": 1.2,
+   "coh": 1.5,
+   "opp": "Jocelyn Benson",
+   "oppRaised": 1.8,
+   "oppCoh": 5.9,
+   "outside": "Ad reservations ~$23M (Benson + allies) vs ~$1M (James) as of Oct 1; RGA-backed Michigan Victory Fund pulled broadcast ads. Mission Michigan (pro-James) spent $4.7M+ by late July, funded largely by $6M from Dan and Pamella DeVos. DGA Victory Fund $80K to Benson.",
+   "notes": "Latest filed period. Benson spent $2.3M, James ~$1.1M. James took $371K public funding in the primary. Michigan's pre-general report (through ~Oct 18) lands late Oct. Duggan withdrew in May.",
+   "sources": "hoodline.com 2026/09 ; bridgemi.com 2026/10/13 ; bridgemi.com top donors",
+   "period": "Jul 20 - Aug 24 (post-primary)",
+   "donors": {
+    "period": "Cycle",
+    "avgGift": null,
+    "smallShare": null,
+    "count": 8300,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": null,
+    "details": "8,300 Michigan contributors (campaign). DeVos family $108K this cycle. Only candidate taking public funding.",
+    "sources": "bridgemi.com top donors"
+   }
+  },
+  {
+   "office": "Governor",
+   "state": "AZ",
+   "name": "Katie Hobbs",
+   "party": "D",
+   "raised": 2.6,
+   "coh": 2.4,
+   "opp": "Andy Biggs",
+   "oppRaised": 0.917,
+   "oppCoh": 1.2,
+   "outside": "DGA pledged $10M for Hobbs; Turning Point PAC spending for Biggs. RGA had committed nothing as of late July.",
+   "notes": "Hobbs spent $7.4M in Q2 on early ads. Conflict: KTAR reports Hobbs raised $1.7M with ~$1.4M COH; AZ Mirror reports $2.6M and $2.4M. Biggs donors mostly small-dollar retirees. Q3 report (through Sep 30) not yet reported in coverage.",
+   "sources": "azmirror.com 2026/07/28 ; newsfromthestates.com Hobbs Q2",
+   "period": "Q2 (Apr - Jun)"
+  },
+  {
+   "office": "Governor",
+   "state": "AZ",
+   "name": "Andy Biggs",
+   "party": "R",
+   "raised": 0.917,
+   "coh": 1.2,
+   "opp": "Katie Hobbs",
+   "oppRaised": 2.6,
+   "oppCoh": 2.4,
+   "outside": "DGA pledged $10M for Hobbs; Turning Point PAC spending for Biggs. RGA had committed nothing as of late July.",
+   "notes": "Hobbs spent $7.4M in Q2 on early ads. Conflict: KTAR reports Hobbs raised $1.7M with ~$1.4M COH; AZ Mirror reports $2.6M and $2.4M. Biggs donors mostly small-dollar retirees. Q3 report (through Sep 30) not yet reported in coverage.",
+   "sources": "azmirror.com 2026/07/28 ; newsfromthestates.com Hobbs Q2",
+   "period": "Q2 (Apr - Jun)"
+  },
+  {
+   "office": "Governor",
+   "state": "FL",
+   "name": "David Jolly",
+   "party": "D",
+   "raised": 20,
+   "coh": null,
+   "opp": "Byron Donalds",
+   "oppRaised": 140,
+   "oppCoh": null,
+   "outside": "DGA has not invested in FL.",
+   "notes": "Approximate cycle totals across each candidate's committees.",
+   "sources": "floridaphoenix.com 2026/10/14",
+   "period": "Cycle to date (mid-Oct)"
+  },
+  {
+   "office": "Governor",
+   "state": "FL",
+   "name": "Byron Donalds",
+   "party": "R",
+   "raised": 140,
+   "coh": null,
+   "opp": "David Jolly",
+   "oppRaised": 20,
+   "oppCoh": null,
+   "outside": "DGA has not invested in FL.",
+   "notes": "Approximate cycle totals across each candidate's committees.",
+   "sources": "floridaphoenix.com 2026/10/14",
+   "period": "Cycle to date (mid-Oct)"
+  },
+  {
+   "office": "Governor",
+   "state": "NM",
+   "name": "Deb Haaland",
+   "party": "D",
+   "raised": 1.9,
+   "coh": 2.8,
+   "opp": "Gregg Hull",
+   "oppRaised": 0.634,
+   "oppCoh": 0.013,
+   "outside": null,
+   "notes": "Haaland ~$20M raised across primary + general.",
+   "sources": "sourcenm.com 2026/10/14",
+   "period": "Sep 8 - early Oct"
+  },
+  {
+   "office": "Governor",
+   "state": "NM",
+   "name": "Gregg Hull",
+   "party": "R",
+   "raised": 0.634,
+   "coh": 0.013,
+   "opp": "Deb Haaland",
+   "oppRaised": 1.9,
+   "oppCoh": 2.8,
+   "outside": null,
+   "notes": "Haaland ~$20M raised across primary + general.",
+   "sources": "sourcenm.com 2026/10/14",
+   "period": "Sep 8 - early Oct",
+   "donors": {
+    "period": "General election",
+    "avgGift": null,
+    "smallShare": null,
+    "count": null,
+    "inStateCount": null,
+    "inStateShareCount": null,
+    "inStateShareDollars": ">50%",
+    "details": "Campaign says vast majority of donors are New Mexicans (contrasts with Haaland's out-of-state base).",
+    "sources": "sourcenm.com 2026/10/14"
+   }
+  },
+  {
+   "office": "Governor",
+   "state": "CO",
+   "name": "Phil Weiser",
+   "party": "D",
+   "raised": 1.7,
+   "coh": 0.725,
+   "opp": "Victor Marx",
+   "oppRaised": 1.1,
+   "oppCoh": 0.158,
+   "outside": null,
+   "notes": "Unaffiliated Greg Lopez ~$16K COH.",
+   "sources": "coloradonewsline.com 2026/10/08",
+   "period": "Q3 (Jul - Sep)"
+  },
+  {
+   "office": "Governor",
+   "state": "CO",
+   "name": "Victor Marx",
+   "party": "R",
+   "raised": 1.1,
+   "coh": 0.158,
+   "opp": "Phil Weiser",
+   "oppRaised": 1.7,
+   "oppCoh": 0.725,
+   "outside": null,
+   "notes": "Unaffiliated Greg Lopez ~$16K COH.",
+   "sources": "coloradonewsline.com 2026/10/08",
+   "period": "Q3 (Jul - Sep)"
+  },
+  {
+   "office": "Governor",
+   "state": "VT",
+   "name": "Amanda Janoo",
+   "party": "D",
+   "raised": 0.291,
+   "coh": 0.28,
+   "opp": "Phil Scott",
+   "oppRaised": 0.223,
+   "oppCoh": 0.296,
+   "outside": "RGA $400K to A Stronger Vermont PAC; DGA $40K to allied PAC.",
+   "notes": "Tight race by Vermont standards.",
+   "sources": "vtdigger.org 2026/10/02 ; wcax.com 2026/10/09",
+   "period": "September"
+  },
+  {
+   "office": "Governor",
+   "state": "VT",
+   "name": "Phil Scott",
+   "party": "R",
+   "raised": 0.223,
+   "coh": 0.296,
+   "opp": "Amanda Janoo",
+   "oppRaised": 0.291,
+   "oppCoh": 0.28,
+   "outside": "RGA $400K to A Stronger Vermont PAC; DGA $40K to allied PAC.",
+   "notes": "Tight race by Vermont standards.",
+   "sources": "vtdigger.org 2026/10/02 ; wcax.com 2026/10/09",
+   "period": "September"
+  }
+ ],
+ "cawp": {
+  "Share of dollars": {
+   "demW": 0.46,
+   "demM": 0.54,
+   "gopW": 0.3,
+   "gopM": 0.7
+  },
+  "Share of donors giving <= $200": {
+   "demW": 0.62,
+   "demM": 0.38,
+   "gopW": 0.45,
+   "gopM": 0.55
+  },
+  "Share of donors giving $1,000+": {
+   "demW": 0.39,
+   "demM": 0.61,
+   "gopW": 0.25,
+   "gopM": 0.75
+  },
+  "Average donation ($)": {
+   "demW": 48,
+   "demM": 87,
+   "gopW": 39,
+   "gopM": 106
+  }
+ },
+ "cawpNote": "Also from CAWP: avg gift received by Senate candidates: Dem men $53, Dem women $58, GOP men $65, GOP women $113. Source: cawp.rutgers.edu ActBlue/WinRed press release (Jun 2026). SLF: ~1/3 of its Q2 donors were first-time givers (Axios, Jul 2026).",
+ "cawpSource": "CAWP (Rutgers) analysis of 2026 ActBlue/WinRed giving to congressional candidates, Jan 1 - Apr 15, 2026; gender estimated via Catalist voter file (92% match).",
+ "compiled": "Compiled Oct 16, 2026 from campaign announcements, FEC/state filings, and news coverage. Some Q3 filings were still landing."
+}
+;
+const PARTY = { D: 'Democrat', R: 'Republican', I: 'Independent' };
+const C = DATA.candidates.map((c, i) => ({ ...c, id: i }));
+let office = 'Senate';
+let selected = null, lastFocus = null;
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+const isNum = v => typeof v === 'number' && isFinite(v);
+const money = v => !isNum(v) ? '—' : v >= 10 ? `$${+v.toFixed(1)}M` : v >= 1 ? `$${+v.toFixed(2)}M` : `$${Math.round(v * 1000)}K`;
+const pct = v => isNum(v) ? `${Math.round(v * 100)}%` : (v ?? '—');
+const int = v => isNum(v) ? v.toLocaleString('en-US') : '—';
+const last = n => n.split(' ').filter(w => !/^[A-Z]\.$/.test(w)).slice(-1)[0];
+
+/* ---------- chart ---------- */
+const svg = d3.select('#chart');
+const tip = $('#tip');
+
+function draw() {
+  const stage = $('#stage');
+  const W = stage.clientWidth;
+  const narrow = W < 620;
+  const data = C.filter(c => c.office === office);
+  const maxR = Math.max(34, Math.min(W * (narrow ? 0.2 : 0.105), 96));
+  const maxV = d3.max(data, d => d.raised || 0);
+  const r = d3.scaleSqrt().domain([0, maxV]).range([0, maxR]);
+  const nodes = data.map(d => ({ ...d, r: isNum(d.raised) ? Math.max(6, r(d.raised)) : 15 }));
+
+  // Pack each party on its own, then place the packs and fit the height to them.
+  const ticks = office === 'Senate' ? [5, 20] : [10, 50];
+  const band = Math.round(2 * r(ticks[1]) + 34);
+  const parties = ['D', 'I', 'R'].filter(p => nodes.some(n => n.party === p));
+  const cx = p => narrow ? W / 2 : ({ D: W * 0.3, I: W * 0.5, R: W * 0.7 })[p];
+  const packs = {};
+  parties.forEach(p => {
+    const grp = nodes.filter(n => n.party === p);
+    const sim = d3.forceSimulation(grp)
+      .force('x', d3.forceX(cx(p)).strength(0.1))
+      .force('y', d3.forceY(0).strength(narrow ? 0.14 : 0.1))
+      .force('c', d3.forceCollide(d => d.r + 2.5).iterations(3))
+      .stop();
+    for (let i = 0; i < 400; i++) sim.tick();
+    grp.forEach(n => { n.x = Math.max(n.r + 4, Math.min(W - n.r - 4, n.x)); });
+    packs[p] = { grp, top: d3.min(grp, n => n.y - n.r), bot: d3.max(grp, n => n.y + n.r) };
+  });
+  const HEAD = 52;
+  let H;
+  if (narrow) {
+    let y = 0;
+    parties.forEach(p => {
+      const k = packs[p];
+      k.head = y + 18;
+      k.grp.forEach(n => { n.y += y + HEAD - k.top; });
+      y += HEAD + (k.bot - k.top) + 24;
+    });
+    H = y + band - 10;
+  } else {
+    const tall = d3.max(parties, p => packs[p].bot - packs[p].top);
+    parties.forEach(p => {
+      const k = packs[p]; k.head = 30;
+      const off = HEAD + 8 + (tall - (k.bot - k.top)) / 2 - k.top;
+      k.grp.forEach(n => { n.y += off; });
+    });
+    H = HEAD + 8 + tall + 16 + band;
+  }
+
+  svg.attr('viewBox', `0 0 ${W} ${H}`).attr('height', H).selectAll('*').remove();
+
+  // Party headers
+  parties.forEach(p => {
+    const grp = nodes.filter(n => n.party === p);
+    const tot = d3.sum(grp, n => n.raised || 0);
+    const top = packs[p].head;
+    const x = narrow ? 16 : cx(p);
+    const g = svg.append('g').attr('transform', `translate(${x},${top})`);
+    g.append('text').attr('class', `side-lbl ${p}`).attr('text-anchor', narrow ? 'start' : 'middle').text(p === 'I' ? 'Independent' : PARTY[p] + 's');
+    g.append('text').attr('class', 'side-sub').attr('y', 16).attr('text-anchor', narrow ? 'start' : 'middle').text(`${tot ? money(tot) + ' total' : 'Not yet reported'} · ${grp.length} candidate${grp.length > 1 ? 's' : ''}`);
+  });
+
+  // Size key (bottom right)
+  const k = svg.append('g').attr('class', 'size-key');
+  const bigR = r(ticks[1]);
+  const kx = W - bigR - 18, ky = H - 12;
+  ticks.forEach(t => {
+    const rr = r(t);
+    k.append('circle').attr('cx', kx).attr('cy', ky - rr).attr('r', rr);
+    k.append('text').attr('x', kx).attr('y', ky - 2 * rr - 4).attr('text-anchor', 'middle').text(`$${t}M`);
+  });
+  if (!narrow) k.append('text').attr('x', kx - bigR - 8).attr('y', ky - 4).attr('text-anchor', 'end').text('Bubble area = $ raised');
+
+  const g = svg.append('g').selectAll('g').data(nodes, d => d.id).join('g')
+    .attr('class', d => `bubble ${isNum(d.raised) ? '' : 'nr'}`)
+    .attr('transform', d => `translate(${d.x},${d.y})`)
+    .attr('tabindex', 0)
+    .attr('role', 'button')
+    .attr('data-id', d => d.id)
+    .attr('aria-label', d => `${d.name}, ${PARTY[d.party]}, ${d.state}. Raised ${isNum(d.raised) ? money(d.raised) : 'not reported'}. Open donor profile.`);
+
+  g.append('circle').attr('class', 'ring').attr('r', d => d.r + 4);
+  g.append('circle').attr('class', 'body').attr('r', d => d.r)
+    .attr('fill', d => `var(--${{ D: 'dem', R: 'gop', I: 'ind' }[d.party]})`);
+
+  g.each(function (d) {
+    const el = d3.select(this);
+    const nr = !isNum(d.raised);
+    if (d.r >= 34) {
+      el.append('text').attr('class', 'lbl-st').attr('y', -d.r * 0.36).text(d.state);
+      el.append('text').attr('class', 'lbl-name').attr('y', 2).text(last(d.name));
+      el.append('text').attr('class', 'lbl-amt').attr('y', 19).text(money(d.raised));
+    } else if (nr) {
+      el.append('text').attr('class', 'lbl-name').attr('y', 4).style('font-size', '10px').text(d.state);
+    } else if (d.r >= 13) {
+      const nm = last(d.name), fs = d.r < 24 ? 10 : 12;
+      el.append('text').attr('class', 'lbl-name').attr('y', 4).style('font-size', fs + 'px')
+        .text(nm.length * fs * 0.6 < 2 * d.r - 6 ? nm : d.state);
+    }
+  });
+
+  g.on('mouseenter', (e, d) => showTip(d))
+   .on('mousemove', e => moveTip(e))
+   .on('mouseleave', hideTip)
+   .on('focus', function (e, d) { showTip(d); const b = this.getBoundingClientRect(), s = $('#stage').getBoundingClientRect(); tip.style.left = (b.left + b.width / 2 - s.left) + 'px'; tip.style.top = (b.top - s.top) + 'px'; })
+   .on('blur', hideTip)
+   .on('click', (e, d) => openDrawer(d.id, e.currentTarget))
+   .on('keydown', (e, d) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDrawer(d.id, e.currentTarget); } });
+
+  markSelection();
+}
+
+function showTip(d) {
+  const opp = C.find(c => c.office === d.office && c.state === d.state && c.name === d.opp);
+  tip.innerHTML = `<b>${esc(d.name)}</b> <span>${d.party} · ${d.state}</span><br>${isNum(d.raised) ? 'Raised ' + money(d.raised) : 'Not yet reported'}${isNum(d.coh) ? ' · COH ' + money(d.coh) : ''}<br><span>vs ${esc(d.opp)} ${isNum(d.oppRaised) ? money(d.oppRaised) : '(n/r)'}</span>`;
+  tip.hidden = false;
+  svg.selectAll('.bubble').classed('opp', b => opp && b.id === opp.id);
+}
+function moveTip(e) {
+  const s = $('#stage').getBoundingClientRect();
+  let x = e.clientX - s.left;
+  x = Math.max(110, Math.min(s.width - 110, x));
+  tip.style.left = x + 'px'; tip.style.top = (e.clientY - s.top) + 'px';
+}
+function hideTip() { tip.hidden = true; svg.selectAll('.bubble').classed('opp', false); }
+function markSelection() { svg.selectAll('.bubble').classed('sel', d => d.id === selected); }
+
+/* ---------- totals, table, notes ---------- */
+function renderMeta() {
+  const data = C.filter(c => c.office === office);
+  const sum = p => d3.sum(data.filter(d => d.party === p), d => d.raised || 0);
+  const nr = data.filter(d => !isNum(d.raised)).length;
+  $('#totals').innerHTML =
+    `<span class="key"><i class="dot D"></i><b>${money(sum('D') + sum('I'))}</b> Dem / Ind</span>` +
+    `<span class="key"><i class="dot R"></i><b>${money(sum('R'))}</b> GOP</span>` +
+    (nr ? `<span class="key"><i class="dot nr"></i>${nr} not reported</span>` : '');
+  $('#viewnote').textContent = office === 'Senate'
+    ? 'Senate figures cover Q3 2026 (Jul 1 to Sep 30), candidate committees only. Super PAC money is not in the bubbles; it appears in each race\'s outside-money note.'
+    : 'Governor figures come from state filings on different calendars, from one month to a full cycle, so compare bubbles with care. Each candidate\'s period is in their profile and the table.';
+  $('#tbl-title').textContent = `All ${office === 'Senate' ? 'Senate' : 'Governor'} candidates`;
+  const rows = [...data].sort((a, b) => (b.raised ?? -1) - (a.raised ?? -1));
+  $('#tbody').innerHTML = rows.map(d => {
+    const dn = d.donors || {};
+    return `<tr tabindex="0" data-id="${d.id}"><td><i class="dot ${d.party}"></i> ${esc(d.name)}</td><td>${d.state}</td><td>${d.party}</td>
+      <td class="n">${isNum(d.raised) ? money(d.raised) : '<span class="na">n/r</span>'}</td>
+      <td class="n">${isNum(d.coh) ? money(d.coh) : '<span class="na">—</span>'}</td>
+      <td class="n">${isNum(dn.avgGift) ? '$' + dn.avgGift : '<span class="na">—</span>'}</td>
+      <td class="n">${dn.smallShare != null ? pct(dn.smallShare) : '<span class="na">—</span>'}</td>
+      <td>${esc(d.period)}</td></tr>`;
+  }).join('');
+  $('#tbody').querySelectorAll('tr').forEach(tr => {
+    const go = () => openDrawer(+tr.dataset.id, tr);
+    tr.addEventListener('click', go);
+    tr.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  });
+}
+
+/* ---------- drawer ---------- */
+function meter(label, v, party) {
+  if (v == null) return '';
+  if (!isNum(v)) return `<div class="meter"><div class="row"><span>${label}</span><b>${esc(v)}</b></div></div>`;
+  return `<div class="meter"><div class="row"><span>${label}</span><b>${pct(v)}</b></div><div class="track"><i class="fill-${party}" style="width:${v * 100}%"></i></div></div>`;
+}
+function stat(label, v, fmt) {
+  const ok = v != null && v !== '';
+  return `<div class="stat ${ok ? '' : 'missing'}"><span class="v">${ok ? fmt(v) : 'Not reported'}</span><span class="k">${label}</span></div>`;
+}
+function sources(s) {
+  if (!s) return '';
+  return `<ul class="src">${s.split(/\s;\s/).map(t => {
+    t = t.trim();
+    const linkable = !/\s/.test(t) && /^[\w.-]+\.[a-z]{2,}\//i.test(t);
+    return `<li>${linkable ? `<a href="https://${esc(t)}" target="_blank" rel="noopener">${esc(t)}</a>` : esc(t)}</li>`;
+  }).join('')}</ul>`;
+}
+
+function openDrawer(id, from) {
+  const d = C[id];
+  if (from) lastFocus = from;
+  selected = id; markSelection();
+  const opp = C.find(c => c.office === d.office && c.state === d.state && c.name === d.opp);
+  const oppParty = opp ? opp.party : (d.party === 'R' ? 'D' : 'R');
+  const dn = d.donors;
+  const both = isNum(d.raised) && isNum(d.oppRaised);
+  const share = both ? d.raised / (d.raised + d.oppRaised) : null;
+
+  let h2h = '';
+  if (both) {
+    h2h = `<div class="meter"><div class="h2h-legend"><span><i class="dot ${d.party}"></i>${esc(last(d.name))} ${money(d.raised)}</span><span>${esc(last(d.opp))} ${money(d.oppRaised)}<i class="dot ${oppParty}"></i></span></div>
+      <div class="track"><i class="fill-${d.party}" style="width:${share * 100}%"></i><i class="fill-${oppParty}" style="flex:1"></i></div>
+      <div class="row"><span>${share >= .5 ? `Outraised opponent ${(d.raised / d.oppRaised).toFixed(1)} to 1` : `Opponent outraised ${(d.oppRaised / d.raised).toFixed(1)} to 1`}</span></div></div>`;
+  }
+
+  let donor;
+  if (!dn) {
+    donor = `<p class="empty">No donor breakdown reported for ${esc(d.name)} yet.</p>`;
+  } else {
+    const anyNum = ['avgGift', 'count', 'inStateCount'].some(k => dn[k] != null);
+    const anyMeter = ['smallShare', 'inStateShareCount', 'inStateShareDollars'].some(k => dn[k] != null);
+    donor = `${dn.shared ? `<p class="prose"><span class="lab">Shared entry:</span> the source reports one figure for ${esc(dn.shared)}.</p>` : ''}
+      ${anyNum || !anyMeter ? `<div class="stats">
+        ${stat('Average gift', dn.avgGift, v => '$' + v)}
+        ${stat('Donors / contributions', dn.count, int)}
+        ${dn.inStateCount != null ? stat('In-state contributions', dn.inStateCount, int) : ''}
+      </div>` : ''}
+      ${meter('Gifts of $100 or less', dn.smallShare, d.party)}
+      ${meter('In-state share of contributions', dn.inStateShareCount, d.party)}
+      ${meter('In-state share of dollars', dn.inStateShareDollars, d.party)}
+      ${dn.details ? `<p class="prose">${esc(dn.details)}</p>` : ''}`;
+  }
+
+  let bench = '';
+  const cw = DATA.cawp;
+  if (d.party !== 'I' && cw['Share of dollars']) {
+    const pre = d.party === 'D' ? 'dem' : 'gop';
+    const row = (lab, o) => `<div class="meter"><div class="row"><span>${lab}</span><b>${pct(o[pre + 'W'])} women · ${pct(o[pre + 'M'])} men</b></div><div class="track"><i class="fill-${d.party}" style="width:${o[pre + 'W'] * 100}%"></i><i class="fill-muted" style="flex:1"></i></div></div>`;
+    const avg = cw['Average donation ($)'];
+    bench = `<section class="d-sec"><h3>Donor gender, ${d.party === 'D' ? 'Democratic' : 'Republican'} benchmark<small>national, not race-level</small></h3>
+      ${row('Share of dollars', cw['Share of dollars'])}
+      ${row('Donors giving $200 or less', cw['Share of donors giving <= $200'])}
+      ${row('Donors giving $1,000+', cw['Share of donors giving $1,000+'])}
+      <p class="prose">Average donation: women $${avg[pre + 'W']}, men $${avg[pre + 'M']}.</p>
+      <p class="note">${esc(DATA.cawpSource)}</p></section>`;
+  }
+
+  $('#drawer').innerHTML = `
+    <div class="d-head">
+      <span class="chip ${d.party}"><i class="dot ${d.party}"></i>${PARTY[d.party]} · ${d.office} · ${d.state}</span>
+      <h2 class="d-name" id="d-name">${esc(d.name)}</h2>
+      <span>vs <button type="button" class="linkish" id="d-opp">${esc(d.opp)}</button></span>
+      <button type="button" class="x" id="d-close" aria-label="Close profile">✕</button>
+    </div>
+    <section class="d-sec"><h3>Money<small>${esc(d.period)}</small></h3>
+      <div class="stats">${stat('Raised', d.raised, money)}${stat('Cash on hand', d.coh, money)}</div>
+      ${h2h}
+    </section>
+    <section class="d-sec"><h3>Donor profile${dn && dn.period ? `<small>${esc(dn.period)}</small>` : ''}</h3>${donor}</section>
+    ${bench}
+    <section class="d-sec"><h3>Race context</h3>
+      ${d.outside ? `<p class="prose"><span class="lab">Outside money.</span> ${esc(d.outside)}</p>` : ''}
+      ${d.notes ? `<p class="prose"><span class="lab">Notes.</span> ${esc(d.notes)}</p>` : ''}
+    </section>
+    <section class="d-sec"><h3>Sources</h3>${sources([d.sources, dn && dn.sources].filter(Boolean).join(' ; '))}</section>`;
+  $('#drawer').hidden = false; $('#scrim').hidden = false;
+  $('#drawer').scrollTop = 0;
+  $('#d-close').onclick = closeDrawer;
+  $('#d-opp').onclick = () => { if (opp) openDrawer(opp.id); };
+  $('#d-close').focus();
+  hideTip();
+}
+function closeDrawer() {
+  $('#drawer').hidden = true; $('#scrim').hidden = true;
+  selected = null; markSelection();
+  if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+}
+$('#scrim').onclick = closeDrawer;
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#drawer').hidden) closeDrawer(); });
+
+/* ---------- view toggle ---------- */
+document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+  office = b.dataset.office;
+  document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  try { localStorage.setItem('bubbles-office', office); } catch (e) {}
+  if (!$('#drawer').hidden) closeDrawer();
+  renderMeta(); draw();
+}));
+try { const o = localStorage.getItem('bubbles-office'); if (o === 'Governor') { office = o; $('#v-gov').setAttribute('aria-pressed', 'true'); $('#v-senate').setAttribute('aria-pressed', 'false'); } } catch (e) {}
+
+$('#compiled').textContent = DATA.compiled + ' $M = millions. Campaign-reported figures are not independently verified.';
+renderMeta(); draw();
+let rt, lastW = $('#stage').clientWidth;
+window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { const w = $('#stage').clientWidth; if (w !== lastW) { lastW = w; draw(); } }, 150); });
+</script>
+
+</body>
+</html>

@@ -48,3 +48,11 @@ python3 -m http.server 8000
 ```
 
 Then open http://localhost:8000.
+
+## Q3 2026 fundraising bubbles
+
+`fundraising.html` is a standalone page: a packed bubble chart of 2026 Senate and Governor candidates,
+sized by money raised (Democrats left, Republicans right), with a Senate/Governor toggle. Click a bubble
+or a table row to open the candidate's donor profile: raised vs cash on hand, head-to-head bar, average gift,
+small-dollar share, in-state share, the CAWP donor-gender benchmark for their party, race notes and sources.
+Data comes from the Q3 2026 Senate/Governor/PAC fundraising workbook compiled Oct 16, 2026.
