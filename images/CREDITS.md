@@ -34,7 +34,6 @@ Republican field: the infobox photo from each person's own Wikipedia article:
 - `vance.jpg`: [File:March_2026_Official_Vice_Presidential_Portrait_of_JD_Vance_(medium_crop)_(2).jpg](https://commons.wikimedia.org/wiki/File:March_2026_Official_Vice_Presidential_Portrait_of_JD_Vance_%28medium_crop%29_%282%29.jpg)
 - `rubio.jpg`: [File:Official_portrait_of_Secretary_Marco_Rubio_(cropped)(2).jpg](https://commons.wikimedia.org/wiki/File:Official_portrait_of_Secretary_Marco_Rubio_%28cropped%29%282%29.jpg)
 - `desantis.jpg`: [File:Ron_DeSantis_official_photo.jpg](https://commons.wikimedia.org/wiki/File:Ron_DeSantis_official_photo.jpg)
-- `trump.jpg`: [File:Official_Presidential_Portrait_of_President_Donald_J._Trump_(2025).jpg](https://commons.wikimedia.org/wiki/File:Official_Presidential_Portrait_of_President_Donald_J._Trump_%282025%29.jpg)
 - `trump-jr.jpg`: [File:Donald_Trump,_Jr._(55021618832)_(cropped_2).jpg](https://commons.wikimedia.org/wiki/File:Donald_Trump%2C_Jr._%2855021618832%29_%28cropped_2%29.jpg)
 - `carlson.jpg`: [File:Tucker_Carlson_(54670577849)_(cropped_2).jpg](https://commons.wikimedia.org/wiki/File:Tucker_Carlson_%2854670577849%29_%28cropped_2%29.jpg)
 - `youngkin.jpg`: [File:Youngkin_Governor_Portrait.jpg](https://commons.wikimedia.org/wiki/File:Youngkin_Governor_Portrait.jpg)

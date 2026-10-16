@@ -40,7 +40,6 @@ window.CANDIDATE_SCORES = {
   vance:           { juice:  8, fundraising:  9, policy:  7, favorability:  5, debate:  8 },
   rubio:           { juice:  6, fundraising:  8, policy:  8, favorability:  6, debate:  8 },
   desantis:        { juice:  4, fundraising:  8, policy:  7, favorability:  5, debate:  6 },
-  trump:           { juice: 10, fundraising: 10, policy:  5, favorability:  5, debate:  7 },
   'trump-jr':      { juice:  6, fundraising:  8, policy:  3, favorability:  4, debate:  6 },
   carlson:         { juice:  6, fundraising:  6, policy:  4, favorability:  4, debate:  8 },
   youngkin:        { juice:  4, fundraising:  8, policy:  6, favorability:  6, debate:  6 },

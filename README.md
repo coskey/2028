@@ -5,7 +5,7 @@ lower right switches between parties (D is the default). Each party keeps its ow
 
 - Democratic tiers: Frontrunner, Contender, Dark Horse, VP Audition, <5%, Joever.
 - Republican tiers: Frontrunner, Contender, Dark Horse, Long Shot, Joever.
-  Candidates: JD Vance, Marco Rubio, Ron DeSantis, Donald Trump, Donald Trump Jr., Tucker Carlson,
+  Candidates: JD Vance, Marco Rubio, Ron DeSantis, Donald Trump Jr., Tucker Carlson,
   Glenn Youngkin, Thomas Massie.
 
 Democratic field:

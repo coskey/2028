@@ -49,7 +49,7 @@ window.PARTIES = {
     eyebrow: 'Republican presidential primaries · 2028',
     exportTitle: 'MY 2028 REPUBLICAN TIER LIST',
     exportSource: '2028 Republican field. Photos via Wikimedia Commons',
-    sourcesHtml: 'Candidates: JD Vance, Marco Rubio, Ron DeSantis, Donald Trump, Donald Trump Jr., Tucker Carlson, Glenn Youngkin and Thomas Massie. ' +
+    sourcesHtml: 'Candidates: JD Vance, Marco Rubio, Ron DeSantis, Donald Trump Jr., Tucker Carlson, Glenn Youngkin and Thomas Massie. ' +
       'Photos are the lead images from each person\'s Wikipedia article, via Wikimedia Commons.',
     tiers: [
       { label: 'Frontrunner', color: '#3fbf6b' },
@@ -62,7 +62,6 @@ window.PARTIES = {
       { id: 'vance', name: 'JD Vance', role: 'Vice President, Ohio', years: '2025–present', wiki: 'JD_Vance' },
       { id: 'rubio', name: 'Marco Rubio', role: 'Secretary of State, Florida', years: '2025–present', wiki: 'Marco_Rubio' },
       { id: 'desantis', name: 'Ron DeSantis', role: 'Governor of Florida', years: '2019–present', wiki: 'Ron_DeSantis' },
-      { id: 'trump', name: 'Donald Trump', role: 'President, Florida', years: '2025–present', wiki: 'Donald_Trump', note: 'Barred from a third term by the 22nd Amendment' },
       { id: 'trump-jr', name: 'Donald Trump Jr.', role: 'Businessman and political commentator, Florida', years: '', wiki: 'Donald_Trump_Jr.' },
       { id: 'carlson', name: 'Tucker Carlson', role: 'Podcaster and former Fox News host', years: '', wiki: 'Tucker_Carlson' },
       { id: 'youngkin', name: 'Glenn Youngkin', role: 'Former Governor of Virginia', years: '2022–2026', wiki: 'Glenn_Youngkin' },
