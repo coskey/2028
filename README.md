@@ -1,8 +1,14 @@
-# 2028 Democratic Tier List
+# 2028 Primary Tier List
 
-Drag-and-drop tier maker for the 2028 Democratic presidential field, in the style of TierMaker.
+Drag-and-drop tier maker for the 2028 presidential fields, in the style of TierMaker. A D/R toggle in the
+lower right switches between parties (D is the default). Each party keeps its own saved list.
 
-Tiers: Frontrunner, Contender, Dark Horse, VP Audition, <5%, Joever.
+- Democratic tiers: Frontrunner, Contender, Dark Horse, VP Audition, <5%, Joever.
+- Republican tiers: Frontrunner, Contender, Dark Horse, Long Shot, Joever.
+  Candidates: JD Vance, Marco Rubio, Ron DeSantis, Donald Trump, Donald Trump Jr., Tucker Carlson,
+  Glenn Youngkin, Thomas Massie.
+
+Democratic field:
 
 Candidates are everyone listed as having expressed interest or as a potential candidate on Wikipedia's
 [2028 Democratic Party presidential primaries](https://en.wikipedia.org/wiki/2028_Democratic_Party_presidential_primaries) page,
@@ -29,7 +35,8 @@ from their own Wikipedia articles).
 ## Files
 
 - `index.html`, `style.css`, `app.js`: the app. Static, no build step.
-- `candidates.js`: the candidate list (names, roles, photos). Edit this to add or remove people.
+- `candidates.js`: both parties' settings (header text, default tiers) and candidate lists. Ids must be unique
+  across parties.
 - `scores.js`: the default 1–10 scores, one line per candidate, plus the attribute names. Edit this to change
   anyone's starting scores or rename an attribute. Keys match the `id` in `candidates.js`.
 - `images/<id>.jpg`: portraits from the Wikipedia article (see `images/CREDITS.md`). If a file is missing, the app loads the lead photo from the person's Wikipedia article.

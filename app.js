@@ -1,27 +1,24 @@
 (function () {
   'use strict';
 
-  var CANDIDATES = window.CANDIDATES || [];
+  // The active party's data. setParty() swaps these.
+  var PARTIES = window.PARTIES || {};
+  var party = 'D';
+  var CANDIDATES = [];
+  var BY_ID = {};
+  var DEFAULT_TIERS = [];
   var FIELD_KEYS = Object.keys(window.SCORE_FIELDS || {});
   var FIELDS = FIELD_KEYS.map(function (k) { return window.SCORE_FIELDS[k]; });
   var SCORES = window.CANDIDATE_SCORES || {};
-  var BY_ID = {};
-  CANDIDATES.forEach(function (c) { BY_ID[c.id] = c; });
 
-  var STORAGE_KEY = 'tier2028.v1';
+  // Each party keeps its own saved list. Democrats keep the original key so existing saves still load.
+  function storageKey() { return party === 'D' ? 'tier2028.v1' : 'tier2028.' + party + '.v1'; }
+  var PARTY_KEY = 'tier2028.party';
   var SHARE_PREFIX = 'r.';
   // Where share links point. A host page can override this (the artifact build sets it).
   var SHARE_BASE = window.TIER_SHARE_BASE || (location.origin + location.pathname);
 
   var PALETTE = ['#3fbf6b', '#9acd52', '#e2cf45', '#f0a948', '#ec7f4a', '#df4d55', '#4fa8e0', '#8a6fe0', '#c86fc9', '#8d96a8'];
-  var DEFAULT_TIERS = [
-    { label: 'Frontrunner', color: '#3fbf6b' },
-    { label: 'Contender', color: '#9acd52' },
-    { label: 'Dark Horse', color: '#e2cf45' },
-    { label: 'VP Audition', color: '#f0a948' },
-    { label: '<5%', color: '#ec7f4a' },
-    { label: 'Joever', color: '#df4d55' },
-  ];
 
   var uid = 0;
   function newTierId() { uid += 1; return 't' + Date.now().toString(36) + uid; }
@@ -94,7 +91,7 @@
   // ---------- persistence ----------
   function save() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      localStorage.setItem(storageKey(), JSON.stringify({
         tiers: state.tiers.map(function (t) { return { label: t.label, color: t.color, items: t.items }; }),
         pool: state.pool,
         showNames: state.showNames,
@@ -105,7 +102,7 @@
   }
   function load() {
     try {
-      var raw = localStorage.getItem(STORAGE_KEY);
+      var raw = localStorage.getItem(storageKey());
       if (raw) return normalize(JSON.parse(raw));
     } catch (e) { /* ignore */ }
     return null;
@@ -132,21 +129,27 @@
     var diffs = ratingDiffs(state.ratings);
     if (Object.keys(diffs).length) payload.r = diffs;
     if (state.expanded) payload.x = 1;
+    if (party !== 'D') payload.p = party;
     return SHARE_PREFIX + b64urlEncode(JSON.stringify(payload));
   }
-  function decodeShare(hash) {
+  // Returns the raw payload; its party (p, default D) must be active before stateFromShare runs.
+  function parseShare(hash) {
     var h = (hash || '').replace(/^#/, '');
     if (h.indexOf(SHARE_PREFIX) !== 0) return null;
     try {
       var p = JSON.parse(b64urlDecode(h.slice(SHARE_PREFIX.length)));
       if (!p || !Array.isArray(p.t)) return null;
-      return normalize({
-        tiers: p.t.map(function (r) { return { label: r[0], color: '#' + r[1], items: r[2] }; }),
-        pool: [],
-        ratings: p.r,
-        expanded: !!p.x,
-      });
+      if (!PARTIES[p.p || 'D']) return null;
+      return p;
     } catch (e) { return null; }
+  }
+  function stateFromShare(p) {
+    return normalize({
+      tiers: p.t.map(function (r) { return { label: r[0], color: '#' + r[1], items: r[2] }; }),
+      pool: [],
+      ratings: p.r,
+      expanded: !!p.x,
+    });
   }
 
   // ---------- images ----------
@@ -317,7 +320,6 @@
     return state.tiers.map(function (t) { return displayItems(t).join(); }).join('|');
   }
 
-  CANDIDATES.forEach(function (c) { cardEls[c.id] = buildCard(c); rowEls[c.id] = buildRow(c); });
 
   // Score edits: update live while typing, clamp to 1–10 when the field is left.
   document.addEventListener('input', function (e) {
@@ -1075,7 +1077,7 @@
       ctx.fillStyle = '#eceef3';
       ctx.font = '700 44px ' + display;
       ctx.textBaseline = 'alphabetic';
-      ctx.fillText('MY 2028 DEMOCRATIC TIER LIST', PAD, 62);
+      ctx.fillText(PARTIES[party].exportTitle, PAD, 62);
 
       // Column titles
       var x0 = PAD + LABEL + WHO;
@@ -1135,7 +1137,7 @@
       ctx.fillStyle = '#9aa1b0';
       ctx.font = '500 13px ' + body;
       ctx.textBaseline = 'alphabetic';
-      ctx.fillText('Candidates from Wikipedia: 2028 Democratic Party presidential primaries. Ratings 1–10.', PAD, H - 18);
+      ctx.fillText(PARTIES[party].exportSource + '. Ratings 1–10.', PAD, H - 18);
       return cv;
     }
   }
@@ -1194,7 +1196,7 @@
       ctx.fillStyle = '#eceef3';
       ctx.font = '700 44px ' + display;
       ctx.textBaseline = 'alphabetic';
-      ctx.fillText('MY 2028 DEMOCRATIC TIER LIST', PAD, 62);
+      ctx.fillText(PARTIES[party].exportTitle, PAD, 62);
 
       var y = HEAD;
       state.tiers.forEach(function (t, ti) {
@@ -1243,7 +1245,7 @@
       ctx.fillStyle = '#9aa1b0';
       ctx.font = '500 13px ' + body;
       ctx.textBaseline = 'alphabetic';
-      ctx.fillText('Candidates from Wikipedia: 2028 Democratic Party presidential primaries', PAD, H - 18);
+      ctx.fillText(PARTIES[party].exportSource, PAD, H - 18);
       return cv;
     }
   }
@@ -1288,9 +1290,56 @@
     toastTimer = setTimeout(function () { el.hidden = true; }, 2600);
   }
 
+  // ---------- party (D / R) ----------
+  var partyToggle = document.getElementById('party-toggle');
+  function setParty(p) {
+    party = PARTIES[p] ? p : 'D';
+    var cfg = PARTIES[party];
+    CANDIDATES = cfg.candidates;
+    BY_ID = {};
+    CANDIDATES.forEach(function (c) { BY_ID[c.id] = c; });
+    DEFAULT_TIERS = cfg.tiers;
+    wikiThumbsPromise = null;
+    selectedId = null;
+    lastTap = { id: null, t: 0 };
+
+    // Throw away the other party's cards and rows.
+    board.textContent = '';
+    poolEl.textContent = '';
+    cardEls = {};
+    rowEls = {};
+    CANDIDATES.forEach(function (c) { cardEls[c.id] = buildCard(c); rowEls[c.id] = buildRow(c); });
+
+    document.documentElement.dataset.party = party;
+    document.getElementById('eyebrow').textContent = cfg.eyebrow;
+    document.getElementById('sources').innerHTML = cfg.sourcesHtml;
+    partyToggle.dataset.active = party;
+    partyToggle.querySelectorAll('[data-party]').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.party === party));
+    });
+    try { localStorage.setItem(PARTY_KEY, party); } catch (e) { /* ignore */ }
+  }
+  partyToggle.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-party]');
+    // A click on the track (not a letter) flips to the other party.
+    var next = b ? b.dataset.party : (party === 'D' ? 'R' : 'D');
+    if (next === party) return;
+    var view = { showNames: state.showNames, expanded: state.expanded };
+    setParty(next);
+    state = load() || defaultState();
+    state.showNames = view.showNames;
+    state.expanded = view.expanded;
+    save();
+    render();
+    toast(PARTIES[party].name + ' field');
+  });
+
   // ---------- boot ----------
-  var shared = decodeShare(location.hash);
-  var state = shared || load() || defaultState();
+  var shared = parseShare(location.hash);
+  var savedParty = null;
+  try { savedParty = localStorage.getItem(PARTY_KEY); } catch (e) { /* ignore */ }
+  setParty(shared ? (shared.p || 'D') : (savedParty || 'D'));
+  var state = shared ? stateFromShare(shared) : (load() || defaultState());
   if (shared) {
     var stored = load();
     if (stored) state.showNames = stored.showNames;
@@ -1298,5 +1347,5 @@
     try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ignore */ }
   }
   render();
-  if (shared) toast('Loaded a shared tier list');
+  if (shared) toast('Loaded a shared ' + PARTIES[party].name + ' tier list');
 })();

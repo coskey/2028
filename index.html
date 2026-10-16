@@ -13,7 +13,7 @@
 <body>
 <main class="wrap">
   <header class="masthead">
-    <span class="eyebrow">Democratic presidential primaries · 2028</span>
+    <span class="eyebrow" id="eyebrow">Democratic presidential primaries · 2028</span>
     <h1>Rank the 2028 field</h1>
     <p class="lede">Drag each candidate into a tier. On a phone, press and hold a photo to pick it up, or tap a photo and then tap a tier. Click a ranked candidate twice to open their profile.</p>
   </header>
@@ -55,8 +55,14 @@
     </div>
   </section>
 
-  <p class="sources">Candidates: everyone listed as having expressed interest or as a potential candidate on Wikipedia's <a href="https://en.wikipedia.org/wiki/2028_Democratic_Party_presidential_primaries" target="_blank" rel="noopener">2028 Democratic Party presidential primaries</a> page, plus Jon Ossoff, Wes Moore, Stephen A. Smith and Cory Booker. No one has formally declared. Photos via Wikimedia Commons.</p>
+  <p class="sources" id="sources"></p>
 </main>
+
+<div class="party-toggle" id="party-toggle" role="group" aria-label="Party" data-active="D">
+  <span class="knob" aria-hidden="true"></span>
+  <button type="button" data-party="D" aria-pressed="true" aria-label="Democratic candidates">D</button>
+  <button type="button" data-party="R" aria-pressed="false" aria-label="Republican candidates">R</button>
+</div>
 
 <script src="candidates.js"></script>
 <script src="scores.js"></script>

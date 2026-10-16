@@ -19,6 +19,8 @@
   --tier-5: #ec7f4a;
   --tier-6: #df4d55;
   --tier-ink: #15140f;
+  --dem: #1f5ad6;
+  --gop: #d22f36;
 
   --font-display: 'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', sans-serif;
   --font-body: 'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -75,7 +77,7 @@ body {
 .wrap {
   max-width: 1180px;
   margin: 0 auto;
-  padding-block: 28px 48px;
+  padding-block: 28px 96px; /* bottom room for the party toggle */
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   display: grid;
@@ -437,6 +439,52 @@ body.expanded .tier { min-height: calc(var(--row-h) + 2px); }
   .pbar { height: 22px; gap: 2px; }
 }
 
+/* Party toggle: fixed bottom right, blue on D, red on R */
+.party-toggle {
+  position: fixed;
+  z-index: 40;
+  right: max(16px, calc(env(safe-area-inset-right, 0px) + 16px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 112px;
+  height: 52px;
+  padding: 4px;
+  border-radius: 26px;
+  background: var(--dem);
+  box-shadow: var(--shadow);
+  transition: background .2s;
+}
+.party-toggle[data-active="R"] { background: var(--gop); }
+.party-toggle .knob {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 52px;
+  height: 44px;
+  border-radius: 22px;
+  background: #fff;
+  transition: transform .2s;
+}
+.party-toggle[data-active="R"] .knob { transform: translateX(52px); }
+.party-toggle button {
+  position: relative;
+  z-index: 1;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  border-radius: 22px;
+  color: #fff;
+  font: 700 24px/1 var(--font-display);
+  cursor: pointer;
+}
+.party-toggle button[aria-pressed="true"] { color: var(--dem); cursor: default; }
+.party-toggle[data-active="R"] button[aria-pressed="true"] { color: var(--gop); }
+.party-toggle button:focus-visible { outline: 3px solid #fff; outline-offset: -3px; }
+@media (prefers-reduced-motion: reduce) {
+  .party-toggle, .party-toggle .knob { transition: none; }
+}
+
 /* Pool */
 .pool-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 h2 {
@@ -516,7 +564,7 @@ h2 {
 .toast {
   position: fixed;
   left: 50%;
-  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px)); /* clears the party toggle */
   transform: translateX(-50%);
   z-index: 70;
   background: var(--fg);
