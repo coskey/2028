@@ -41,6 +41,14 @@ from their own Wikipedia articles).
   anyone's starting scores or rename an attribute. Keys match the `id` in `candidates.js`.
 - `images/<id>.jpg`: portraits from the Wikipedia article (see `images/CREDITS.md`). If a file is missing, the app loads the lead photo from the person's Wikipedia article.
 
+## Horse race (`/horserace`)
+
+`horserace/index.html` draws each party's field as a racetrack under the title "WHO'S YOUR FRONTRUNNER?".
+Each candidate gets a lane and a bubble head (no names). Lane order and positions come from the
+Times/Siena poll of registered voters, Oct. 12–19, 2026 (primary vote choice), stored in `horserace/poll.js`.
+Only candidates on the tier list who are named in the poll are included. The leader runs in the inside lane
+just short of the green-and-white checkered finish; others are placed in proportion to the leader's share.
+
 ## Run locally
 
 ```

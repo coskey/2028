@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>2028 Primary Horse Race</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Barlow+Condensed:wght@600;700&family=Public+Sans:wght@400;600&display=swap">
+<link rel="stylesheet" href="race.css">
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <a class="nav" id="nav-tiers" href="../">← Tier list</a>
+    <h1>WHO’S YOUR FRONTRUNNER?</h1>
+    <p class="sub">Each lane is one candidate. The poll leader runs closest to the finish, and everyone else is placed by their share of the vote.</p>
+    <button class="replay" id="replay" type="button">Replay the race</button>
+  </header>
+
+  <section class="race" data-party="D" aria-labelledby="race-d-title">
+    <div class="race-head">
+      <h2 id="race-d-title"></h2>
+      <p class="universe"></p>
+    </div>
+    <div class="track-scroll"></div>
+  </section>
+
+  <section class="race" data-party="R" aria-labelledby="race-r-title">
+    <div class="race-head">
+      <h2 id="race-r-title"></h2>
+      <p class="universe"></p>
+    </div>
+    <div class="track-scroll"></div>
+  </section>
+
+  <p class="source" id="source"></p>
+</main>
+
+<script src="poll.js"></script>
+<script src="race.js"></script>
+</body>
+</html>
