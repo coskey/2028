@@ -4,19 +4,24 @@
   var POLL = window.POLL;
   var SVG_NS = 'http://www.w3.org/2000/svg';
 
-  // Track geometry, in SVG units. Both tracks share the same width so they line up.
-  // The drawing renders at 40% of its original size (see race.css); K scales heads, lines and
-  // labels back up so they keep their on-screen size.
-  var K = 1 / 0.4;
-  var LANE = 56;          // lane width
-  var R0 = 64;            // radius of the inside rail on the turn
-  var HEAD_R = 25 * K;    // bubble head radius
-  var BACK_SHARE = 0.55;  // stretch into the turn, as a share of the straightaway
-  var M = 34 + HEAD_R;    // margin around the track (room for heads on the outside lane)
-  var X_FINISH = 1500;    // finish line x
-  var VB_W = 1580 + HEAD_R; // viewBox width (leaves a run-out past the finish)
-  var F_START = 0.035;    // where a 0% candidate would sit (fraction of the lane)
-  var F_LEADER = 0.94;    // where the poll leader sits, just short of the finish
+  // Straightaway geometry, in SVG units. Lanes run left to right; the poll leader is in the top lane.
+  var LANE = 56;          // lane width (a head fits inside one lane)
+  var HEAD_R = 24;        // bubble head radius
+  var M = 26;             // turf above and below the track
+  // On narrow screens the straightaway is shorter, so it fits the screen with heads big enough to grab.
+  var narrowQuery = window.matchMedia('(max-width: 700px)');
+  var VB_W, X_START, X_FINISH;
+  function setGeometry() {
+    var narrow = narrowQuery.matches;
+    VB_W = narrow ? 760 : 1400;     // viewBox width
+    X_START = narrow ? 76 : 120;    // start line
+    X_FINISH = narrow ? 664 : 1290; // finish line
+  }
+  // Positions use a square-root scale so the field sits closer together than a straight proportion:
+  // the leader is just short of the finish and the lowest share starts about a third of the way down.
+  var F_LOW = 0.32;
+  var F_LEADER = 0.95;
+  var CURVE = 0.5;
 
   var COLORS = {
     grass: '#3c8a3d',
@@ -41,20 +46,14 @@
     return n;
   }
 
-  // One lane (or the whole track when r is its middle radius): into the turn, around it, down the straightaway.
-  function lanePath(cx, cy, xStart, r, xEnd) {
-    return 'M ' + xStart + ' ' + (cy - r) +
-      ' L ' + cx + ' ' + (cy - r) +
-      ' A ' + r + ' ' + r + ' 0 0 0 ' + cx + ' ' + (cy + r) +
-      ' L ' + xEnd + ' ' + (cy + r);
-  }
-
-  function label(svg, text, x, y) {
+  // Vertical painted label in the chute before the start or the run-out after the finish.
+  function label(svg, text, x, cy) {
     var t = el('text', {
-      x: x, y: y, 'text-anchor': 'middle',
+      x: x, y: cy, 'text-anchor': 'middle', 'dominant-baseline': 'central',
+      transform: 'rotate(-90 ' + x + ' ' + cy + ')',
       fill: '#ffffff', 'fill-opacity': 0.85,
       'font-family': "'Alfa Slab One', Rockwell, Georgia, serif",
-      'font-size': 18 * K, 'letter-spacing': 1.5 * K,
+      'font-size': 30, 'letter-spacing': 4,
       'aria-hidden': 'true',
     }, svg);
     t.textContent = text;
@@ -64,11 +63,9 @@
     var data = POLL[partyKey];
     var field = data.field;
     var n = field.length;
-    var outer = R0 + n * LANE;
-    var cx = M + outer;
-    var cy = M + outer;
-    var H = 2 * (outer + M);
-    var xStart = cx + Math.round((X_FINISH - cx) * BACK_SHARE);
+    var top = M;
+    var bottom = M + n * LANE;
+    var H = bottom + M;
     var uid = 'trk-' + partyKey;
 
     section.querySelector('h2').textContent = data.title;
@@ -85,60 +82,54 @@
     el('rect', { width: 120, height: 120, fill: COLORS.grass }, stripes);
     el('rect', { width: 60, height: 120, fill: COLORS.grassStripe }, stripes);
     var shadow = el('filter', { id: uid + '-shadow', x: '-50%', y: '-50%', width: '200%', height: '200%' }, defs);
-    el('feDropShadow', { dx: 0, dy: 3 * K, stdDeviation: 3 * K, 'flood-color': '#000', 'flood-opacity': 0.45 }, shadow);
+    el('feDropShadow', { dx: 0, dy: 3, stdDeviation: 3, 'flood-color': '#000', 'flood-opacity': 0.45 }, shadow);
 
-    // Turf, then the dirt track drawn as one wide stroke along the middle of the lanes.
+    // Turf, then the dirt straightaway.
     el('rect', { width: VB_W, height: H, fill: 'url(#' + uid + '-turf)' }, svg);
-    var rMid = R0 + (n * LANE) / 2;
-    el('path', {
-      d: lanePath(cx, cy, xStart + 46, rMid, VB_W),
-      fill: 'none', stroke: COLORS.dirt, 'stroke-width': n * LANE + 8,
-    }, svg);
+    el('rect', { x: 0, y: top, width: VB_W, height: n * LANE, fill: COLORS.dirt }, svg);
 
     // Lane lines and rails.
     for (var k = 0; k <= n; k++) {
       var edge = k === 0 || k === n;
-      el('path', {
-        d: lanePath(cx, cy, xStart + 46, R0 + k * LANE, VB_W),
-        fill: 'none',
-        stroke: COLORS.rail,
-        'stroke-width': edge ? 5 * K : 2 * K,
-        'stroke-opacity': edge ? 1 : 0.55,
+      el('line', {
+        x1: 0, x2: VB_W, y1: top + k * LANE, y2: top + k * LANE,
+        stroke: COLORS.rail, 'stroke-width': edge ? 6 : 2, 'stroke-opacity': edge ? 1 : 0.55,
       }, svg);
     }
 
-    // Start line across the lanes, and its label in the infield.
-    el('line', { x1: xStart, y1: cy - R0, x2: xStart, y2: cy - outer, stroke: '#fff', 'stroke-width': 5 * K }, svg);
-    label(svg, 'START', xStart, cy - outer - 10 * K);
-
-    // Checkered finish line, green and white.
+    // Start line, and the checkered green-and-white finish line.
+    el('line', { x1: X_START, y1: top, x2: X_START, y2: bottom, stroke: '#fff', 'stroke-width': 6 }, svg);
+    label(svg, 'START', X_START / 2, (top + bottom) / 2);
     var sq = LANE / 2;
     var cols = 3;
-    var rows = Math.round((n * LANE) / sq);
     var fx = X_FINISH - (cols * sq) / 2;
     var check = el('g', { 'aria-hidden': 'true' }, svg);
-    for (var row = 0; row < rows; row++) {
+    for (var row = 0; row < n * 2; row++) {
       for (var col = 0; col < cols; col++) {
         el('rect', {
-          x: fx + col * sq, y: cy + R0 + row * sq, width: sq, height: sq,
+          x: fx + col * sq, y: top + row * sq, width: sq, height: sq,
           fill: (row + col) % 2 ? COLORS.check : '#ffffff',
         }, check);
       }
     }
-    label(svg, 'FINISH', X_FINISH, cy + outer + 24 * K);
+    label(svg, 'FINISH', (X_FINISH + cols * sq / 2 + VB_W) / 2, (top + bottom) / 2);
 
-    // Lane centerlines, measured for placing heads. Lane 0 (inside) is the poll leader.
+    // Lane centerlines, used for placing and dragging heads. Lane 0 (top) is the poll leader.
     var vmax = Math.max.apply(null, field.map(function (c) { return value(c.pct); }));
+    var vmin = Math.min.apply(null, field.map(function (c) { return value(c.pct); }));
+    function target(v) {
+      var lo = Math.pow(vmin, CURVE);
+      var hi = Math.pow(vmax, CURVE);
+      var t = hi === lo ? 1 : (Math.pow(v, CURVE) - lo) / (hi - lo);
+      return F_LOW + (F_LEADER - F_LOW) * t;
+    }
     var heads = el('g', {}, svg);
     var runners = field.map(function (c, i) {
-      var path = el('path', { d: lanePath(cx, cy, xStart, R0 + (i + 0.5) * LANE, X_FINISH), fill: 'none', stroke: 'none' }, svg);
+      var y = top + (i + 0.5) * LANE;
+      var path = el('path', { d: 'M ' + X_START + ' ' + y + ' L ' + X_FINISH + ' ' + y, fill: 'none', stroke: 'none' }, svg);
       var len = path.getTotalLength();
-      // Sample the lane once so dragging can find the nearest point quickly.
       var samples = [];
-      for (var s = 0; s <= 400; s++) {
-        var p = path.getPointAtLength((s / 400) * len);
-        samples.push({ x: p.x, y: p.y, f: s / 400 });
-      }
+      for (var s = 0; s <= 400; s++) samples.push({ x: X_START + (s / 400) * len, y: y, f: s / 400 });
       return {
         c: c,
         svg: svg,
@@ -146,8 +137,8 @@
         path: path,
         len: len,
         samples: samples,
-        target: F_START + (F_LEADER - F_START) * (value(c.pct) / vmax),
-        f: F_START,
+        target: target(value(c.pct)),
+        f: 0,
         moved: false,
       };
     });
@@ -165,7 +156,6 @@
       }, heads);
       var clip = el('clipPath', { id: uid + '-clip-' + i }, defs);
       el('circle', { r: HEAD_R }, clip);
-      el('ellipse', { cx: 0, cy: HEAD_R * 0.92, rx: HEAD_R * 0.8, ry: HEAD_R * 0.28, fill: '#000', 'fill-opacity': 0.28 }, g);
       var face = el('g', { filter: 'url(#' + uid + '-shadow)' }, g);
       el('circle', { r: HEAD_R, fill: '#d9d4cc' }, face);
       el('image', {
@@ -174,7 +164,7 @@
         preserveAspectRatio: 'xMidYMid slice',
         'clip-path': 'url(#' + uid + '-clip-' + i + ')',
       }, face);
-      el('circle', { class: 'ring', r: HEAD_R, fill: 'none', stroke: '#fff', 'stroke-width': 3 * K }, face);
+      el('circle', { class: 'ring', r: HEAD_R, fill: 'none', stroke: '#fff', 'stroke-width': 3 }, face);
       r.g = g;
       r.heads = heads;
       attachDrag(r);
@@ -291,8 +281,20 @@
   window.addEventListener('resize', positionNameTag);
 
   var allRunners = [];
-  document.querySelectorAll('.race').forEach(function (section) {
-    allRunners = allRunners.concat(buildTrack(section.dataset.party, section));
+  function buildAll() {
+    hideNameTag();
+    setGeometry();
+    allRunners = [];
+    document.querySelectorAll('.race').forEach(function (section) {
+      section.querySelector('.track-scroll').textContent = '';
+      allRunners = allRunners.concat(buildTrack(section.dataset.party, section));
+    });
+  }
+  buildAll();
+  // Crossing the phone breakpoint redraws the tracks at the other length, back at poll positions.
+  narrowQuery.addEventListener('change', function () {
+    buildAll();
+    allRunners.forEach(function (r) { place(r, r.target); });
   });
 
   // The race: everyone leaves the start line together and eases into their poll position.
@@ -312,10 +314,10 @@
       if (t0 === null) t0 = ts;
       var t = Math.min(1, (ts - t0) / DURATION);
       var e = 1 - Math.pow(1 - t, 3);
-      allRunners.forEach(function (r) { if (!r.moved) place(r, F_START * (1 - e) + r.target * e); });
+      allRunners.forEach(function (r) { if (!r.moved) place(r, r.target * e); });
       if (t < 1) raf = requestAnimationFrame(frame);
     }
-    allRunners.forEach(function (r) { place(r, F_START); });
+    allRunners.forEach(function (r) { place(r, 0); });
     raf = requestAnimationFrame(frame);
   }
   // Final positions first, so the page is complete even before the animation runs.
@@ -324,6 +326,6 @@
   document.getElementById('replay').addEventListener('click', run);
 
   document.getElementById('source').textContent =
-    'Lane order and starting positions: ' + POLL.source + '. Each track is scaled to its own leader.';
+    'Lane order and starting positions: ' + POLL.source + '. Positions use a square-root scale, so gaps are compressed; each track is scaled to its own field.';
   if (window.TIER_LIST_URL) document.getElementById('nav-tiers').href = window.TIER_LIST_URL;
 })();

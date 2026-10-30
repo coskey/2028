@@ -89,9 +89,9 @@ h2 {
   text-transform: uppercase;
 }
 .race-head p { margin: 0; color: var(--muted); font-size: 14px; }
-.track-scroll { position: relative; overflow-x: auto; display: grid; justify-items: center; }
-/* The track is drawn at 40% of its original size: 40% of the column, never under 40% of the old 760px minimum. */
-.track-scroll svg { display: block; width: max(304px, 40%); height: auto; border-radius: 10px; }
+.track-scroll { position: relative; overflow-x: auto; display: grid; justify-items: safe center; }
+/* Straightaway: up to 1100px wide. Phones get a shorter track (drawn in race.js) that fits the screen. */
+.track-scroll svg { display: block; width: min(100%, 1100px); height: auto; border-radius: 10px; }
 .head { cursor: grab; touch-action: none; outline: none; }
 .head.grabbed { cursor: grabbing; }
 .head:focus-visible .ring { stroke: #ffd84d; }

@@ -43,11 +43,12 @@ from their own Wikipedia articles).
 
 ## Horse race (`/horserace`)
 
-`horserace/index.html` draws each party's field as a racetrack under the title "WHO'S YOUR FRONTRUNNER?".
+`horserace/index.html` draws each party's field as a straightaway under the title "WHO'S YOUR FRONTRUNNER?".
 Each candidate gets a lane and a bubble head (no names). Lane order and positions come from the
 Times/Siena poll of registered voters, Oct. 12–19, 2026 (primary vote choice), stored in `horserace/poll.js`.
-Only candidates on the tier list who are named in the poll are included. The leader runs in the inside lane
-just short of the green-and-white checkered finish; others are placed in proportion to the leader's share.
+Only candidates on the tier list who are named in the poll are included. The leader runs in the top lane
+just short of the green-and-white checkered finish. Positions use a square-root scale (the lowest share starts
+about a third of the way down), so the field sits closer together than a straight proportion.
 Heads can be dragged along their own lane (mouse or touch) or moved with the arrow keys; clicking a head shows
 the candidate's name. "Replay the race" puts everyone back at their poll positions.
 
