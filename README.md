@@ -48,6 +48,8 @@ Each candidate gets a lane and a bubble head (no names). Lane order and position
 Times/Siena poll of registered voters, Oct. 12–19, 2026 (primary vote choice), stored in `horserace/poll.js`.
 Only candidates on the tier list who are named in the poll are included. The leader runs in the inside lane
 just short of the green-and-white checkered finish; others are placed in proportion to the leader's share.
+Heads can be dragged along their own lane (mouse or touch) or moved with the arrow keys; clicking a head shows
+the candidate's name. "Replay the race" puts everyone back at their poll positions.
 
 ## Run locally
 
